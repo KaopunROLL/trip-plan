@@ -1,0 +1,4053 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Trip Plan - Smart Trip Planner Prototype">
+  <title>Trip Plan – Smart Trip Planner</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --primary-light: #eff6ff;
+      --secondary: #0f766e;
+      --success: #15803d;
+      --warning: #b45309;
+      --danger: #dc2626;
+      --text: #172033;
+      --muted: #64748b;
+      --line: #dbe3ef;
+      --surface: #ffffff;
+      --background: #f5f8fc;
+      --radius: 18px;
+      --shadow: 0 12px 35px rgba(25, 42, 70, 0.10);
+      --small-shadow: 0 6px 18px rgba(25, 42, 70, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      color: var(--text);
+      background: var(--background);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        "Noto Sans Thai", sans-serif;
+      line-height: 1.55;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      touch-action: manipulation;
+    }
+
+    button:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible,
+    a:focus-visible {
+      outline: 3px solid rgba(37, 99, 235, 0.25);
+      outline-offset: 2px;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin-top: 0;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .container {
+      width: min(1180px, calc(100% - 32px));
+      margin-inline: auto;
+    }
+
+    .demo-notice {
+      padding: 8px 15px;
+      color: #fff;
+      background: #172033;
+      text-align: center;
+      font-size: 0.8rem;
+    }
+
+    .site-header {
+      position: sticky;
+      z-index: 50;
+      top: 0;
+      border-bottom: 1px solid rgba(219, 227, 239, 0.9);
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(15px);
+    }
+
+    .nav-wrap {
+      min-height: 68px;
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      padding: 0;
+      border: 0;
+      color: var(--text);
+      background: transparent;
+      cursor: pointer;
+      font-weight: 900;
+      font-size: 1.08rem;
+    }
+
+    .brand-mark {
+      width: 40px;
+      height: 40px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      background: linear-gradient(135deg, var(--primary), #38bdf8);
+      border-radius: 13px;
+      box-shadow: var(--small-shadow);
+    }
+
+    .main-nav {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+      overflow-x: auto;
+    }
+
+    .nav-button {
+      flex: 0 0 auto;
+      padding: 9px 12px;
+      border: 0;
+      color: var(--muted);
+      background: transparent;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 750;
+    }
+
+    .nav-button:hover,
+    .nav-button.active {
+      color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    .page {
+      display: none;
+      min-height: calc(100vh - 110px);
+      animation: fadeIn 0.22s ease;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(5px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .hero {
+      overflow: hidden;
+      padding: 78px 0 65px;
+      background:
+        radial-gradient(circle at 15% 25%, rgba(56, 189, 248, 0.2), transparent 27%),
+        radial-gradient(circle at 88% 20%, rgba(37, 99, 235, 0.2), transparent 27%),
+        linear-gradient(135deg, #f8fbff, #eef5ff);
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 46px;
+      align-items: center;
+    }
+
+    .eyebrow,
+    .badge {
+      width: fit-content;
+      display: inline-flex;
+      gap: 6px;
+      align-items: center;
+      padding: 6px 10px;
+      color: var(--primary-dark);
+      background: var(--primary-light);
+      border: 1px solid #bfdbfe;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 800;
+    }
+
+    .badge.success {
+      color: var(--success);
+      background: #f0fdf4;
+      border-color: #bbf7d0;
+    }
+
+    .badge.warning {
+      color: var(--warning);
+      background: #fffbeb;
+      border-color: #fde68a;
+    }
+
+    .badge.neutral {
+      color: #475569;
+      background: #f8fafc;
+      border-color: #e2e8f0;
+    }
+
+    .hero h1 {
+      max-width: 720px;
+      margin: 18px 0;
+      font-size: clamp(2.35rem, 6vw, 4.7rem);
+      line-height: 1.04;
+      letter-spacing: -0.05em;
+    }
+
+    .gradient-text {
+      color: transparent;
+      background: linear-gradient(90deg, var(--primary), #0891b2);
+      background-clip: text;
+      -webkit-background-clip: text;
+    }
+
+    .hero-copy {
+      max-width: 680px;
+      color: var(--muted);
+      font-size: 1.06rem;
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .button {
+      min-height: 44px;
+      display: inline-flex;
+      gap: 7px;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 16px;
+      border: 1px solid transparent;
+      border-radius: 12px;
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: 800;
+      transition: 0.18s ease;
+    }
+
+    .button:hover {
+      transform: translateY(-1px);
+    }
+
+    .button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .button.primary {
+      color: #fff;
+      background: var(--primary);
+      box-shadow: 0 8px 20px rgba(37, 99, 235, 0.2);
+    }
+
+    .button.primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .button.secondary {
+      color: var(--text);
+      background: #fff;
+      border-color: var(--line);
+    }
+
+    .button.ghost {
+      color: var(--primary);
+      background: var(--primary-light);
+      border-color: #bfdbfe;
+    }
+
+    .button.danger {
+      color: var(--danger);
+      background: #fff;
+      border-color: #fecaca;
+    }
+
+    .button.small {
+      min-height: 36px;
+      padding: 7px 11px;
+      font-size: 0.84rem;
+    }
+
+    .hero-card {
+      padding: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      background: rgba(255, 255, 255, 0.85);
+      border-radius: 27px;
+      box-shadow: var(--shadow);
+    }
+
+    .hero-map {
+      position: relative;
+      height: 285px;
+      overflow: hidden;
+      background:
+        linear-gradient(45deg, transparent 46%, rgba(255,255,255,.7) 47%, rgba(255,255,255,.7) 53%, transparent 54%),
+        linear-gradient(135deg, #dbeafe, #ccfbf1);
+      background-size: 70px 70px, auto;
+      border-radius: 21px;
+    }
+
+    .hero-route {
+      position: absolute;
+      width: 235px;
+      height: 120px;
+      top: 80px;
+      left: 55px;
+      border: 4px dashed var(--primary);
+      border-color: var(--primary) var(--primary) transparent transparent;
+      border-radius: 50%;
+      transform: rotate(14deg);
+    }
+
+    .map-pin {
+      position: absolute;
+      width: 43px;
+      height: 43px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      border: 5px solid #fff;
+      background: var(--primary);
+      border-radius: 50% 50% 50% 5px;
+      box-shadow: var(--small-shadow);
+      transform: rotate(-45deg);
+    }
+
+    .map-pin span {
+      transform: rotate(45deg);
+    }
+
+    .map-pin.pin-1 {
+      top: 50px;
+      left: 40px;
+    }
+
+    .map-pin.pin-2 {
+      top: 125px;
+      right: 55px;
+      background: var(--secondary);
+    }
+
+    .map-pin.pin-3 {
+      bottom: 35px;
+      left: 115px;
+      background: #f59e0b;
+    }
+
+    .hero-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 9px;
+      margin-top: 14px;
+    }
+
+    .hero-stat {
+      padding: 11px;
+      background: #f8fafc;
+      border-radius: 12px;
+      text-align: center;
+    }
+
+    .hero-stat strong {
+      display: block;
+    }
+
+    .hero-stat small {
+      color: var(--muted);
+    }
+
+    .section {
+      padding: 62px 0;
+    }
+
+    .section-heading {
+      max-width: 720px;
+      margin: 0 auto 31px;
+      text-align: center;
+    }
+
+    .section-heading h2 {
+      margin: 10px 0 8px;
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .card {
+      padding: 21px;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--small-shadow);
+    }
+
+    .feature-grid,
+    .step-grid,
+    .saved-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 17px;
+    }
+
+    .feature-icon {
+      width: 47px;
+      height: 47px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 13px;
+      background: var(--primary-light);
+      border-radius: 14px;
+      font-size: 1.35rem;
+    }
+
+    .page-header {
+      padding: 42px 0 24px;
+    }
+
+    .page-header h1 {
+      margin: 9px 0 7px;
+      font-size: clamp(2rem, 5vw, 3rem);
+    }
+
+    .wizard-shell {
+      padding-bottom: 60px;
+    }
+
+    .progress-card {
+      margin-bottom: 18px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: var(--radius);
+      box-shadow: var(--small-shadow);
+    }
+
+    .progress-track {
+      height: 8px;
+      overflow: hidden;
+      margin: 14px 0 16px;
+      background: #e8edf5;
+      border-radius: 999px;
+    }
+
+    .progress-fill {
+      width: 16.67%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), #38bdf8);
+      border-radius: inherit;
+      transition: width 0.25s ease;
+    }
+
+    .step-nav {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 7px;
+    }
+
+    .step-pill {
+      padding: 8px 5px;
+      border: 1px solid var(--line);
+      color: var(--muted);
+      background: #fff;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 0.77rem;
+      font-weight: 750;
+    }
+
+    .step-pill.active {
+      color: #fff;
+      border-color: var(--primary);
+      background: var(--primary);
+    }
+
+    .wizard-card {
+      padding: clamp(20px, 4vw, 34px);
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .wizard-step {
+      display: none;
+    }
+
+    .wizard-step.active {
+      display: block;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-top: 22px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .field.full {
+      grid-column: 1 / -1;
+    }
+
+    .field label {
+      color: #334155;
+      font-weight: 800;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      min-height: 46px;
+      padding: 10px 12px;
+      border: 1px solid #cbd5e1;
+      color: var(--text);
+      background: #fff;
+      border-radius: 11px;
+    }
+
+    textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+      outline: 0;
+    }
+
+    .choice-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 11px;
+      margin-top: 21px;
+    }
+
+    .choice {
+      position: relative;
+      cursor: pointer;
+    }
+
+    .choice input {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .choice-content {
+      height: 100%;
+      display: block;
+      padding: 17px;
+      border: 2px solid var(--line);
+      background: #fff;
+      border-radius: 14px;
+      transition: 0.16s ease;
+    }
+
+    .choice-content strong,
+    .choice-content small {
+      display: block;
+    }
+
+    .choice-content small {
+      margin-top: 4px;
+      color: var(--muted);
+    }
+
+    .choice input:checked + .choice-content {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+    }
+
+    .wizard-footer {
+      display: flex;
+      gap: 10px;
+      justify-content: space-between;
+      margin-top: 27px;
+      padding-top: 20px;
+      border-top: 1px solid var(--line);
+    }
+
+    .review-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 13px;
+      margin-top: 20px;
+    }
+
+    .review-item {
+      padding: 14px;
+      border: 1px solid var(--line);
+      background: #f8fafc;
+      border-radius: 12px;
+    }
+
+    .review-item span {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
+    .create-panel {
+      margin-top: 22px;
+      padding: 18px;
+      border: 1px solid #bfdbfe;
+      background: var(--primary-light);
+      border-radius: 15px;
+      text-align: center;
+    }
+
+    .create-panel .button {
+      min-width: 240px;
+    }
+
+    .result-page {
+      padding: 34px 0 65px;
+    }
+
+    .result-hero {
+      padding: clamp(22px, 4vw, 33px);
+      color: #fff;
+      background:
+        radial-gradient(circle at 90% 20%, rgba(255,255,255,.2), transparent 25%),
+        linear-gradient(135deg, #1d4ed8, #0f766e);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .result-hero .muted {
+      color: rgba(255, 255, 255, 0.82);
+    }
+
+    .result-title-row,
+    .section-title-row {
+      display: flex;
+      gap: 18px;
+      align-items: flex-start;
+      justify-content: space-between;
+    }
+
+    .result-title-row h1 {
+      margin: 12px 0 8px;
+    }
+
+    .summary-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+      margin-top: 21px;
+    }
+
+    .summary-chip {
+      padding: 8px 11px;
+      color: #fff;
+      border: 1px solid rgba(255,255,255,.25);
+      background: rgba(255,255,255,.13);
+      border-radius: 999px;
+      font-size: 0.85rem;
+    }
+
+    .result-section {
+      margin-top: 20px;
+      padding: clamp(18px, 3vw, 26px);
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: var(--radius);
+      box-shadow: var(--small-shadow);
+    }
+
+    .section-title-row {
+      margin-bottom: 17px;
+    }
+
+    .section-title-row h2 {
+      margin-bottom: 4px;
+    }
+
+    .demo-label {
+      width: fit-content;
+      padding: 8px 11px;
+      color: #92400e;
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-radius: 10px;
+      font-size: 0.77rem;
+    }
+
+    .smart-box {
+      padding: 16px;
+      border: 1px solid #bfdbfe;
+      color: #1e3a8a;
+      background: var(--primary-light);
+      border-radius: 14px;
+    }
+
+    .smart-box strong {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .optimizer-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .recommendation-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 13px;
+      margin-top: 15px;
+    }
+
+    .place-card {
+      display: flex;
+      flex-direction: column;
+      padding: 16px;
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 14px;
+    }
+
+    .place-emoji {
+      width: 45px;
+      height: 45px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 10px;
+      background: #f1f5f9;
+      border-radius: 12px;
+      font-size: 1.4rem;
+    }
+
+    .place-card p {
+      flex: 1;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .place-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 8px 0 11px;
+    }
+
+    .day-card {
+      overflow: hidden;
+      margin-bottom: 14px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+    }
+
+    .day-header {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      background: #f8fafc;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .day-header h3 {
+      margin: 0;
+    }
+
+    .timeline {
+      padding: 8px 16px;
+    }
+
+    .timeline-item {
+      position: relative;
+      display: grid;
+      grid-template-columns: 68px 26px 1fr auto;
+      gap: 10px;
+      padding: 12px 0;
+    }
+
+    .timeline-item:not(:last-child)::after {
+      position: absolute;
+      top: 37px;
+      bottom: -10px;
+      left: 80px;
+      width: 2px;
+      content: "";
+      background: #dbeafe;
+    }
+
+    .timeline-time {
+      color: var(--primary-dark);
+      font-weight: 900;
+    }
+
+    .timeline-dot {
+      z-index: 1;
+      width: 18px;
+      height: 18px;
+      margin-top: 3px;
+      border: 4px solid #dbeafe;
+      background: var(--primary);
+      border-radius: 50%;
+    }
+
+    .timeline-content strong {
+      display: block;
+      margin-bottom: 3px;
+    }
+
+    .timeline-content small {
+      color: var(--muted);
+    }
+
+    .timeline-actions {
+      display: flex;
+      gap: 5px;
+    }
+
+    .icon-button {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--line);
+      color: var(--muted);
+      background: #fff;
+      border-radius: 9px;
+      cursor: pointer;
+    }
+
+    .icon-button:hover {
+      color: var(--primary);
+      border-color: #93c5fd;
+      background: var(--primary-light);
+    }
+
+    .icon-button.danger:hover {
+      color: var(--danger);
+      border-color: #fecaca;
+      background: #fef2f2;
+    }
+
+    .budget-layout {
+      display: grid;
+      grid-template-columns: 230px 1fr;
+      gap: 24px;
+      align-items: center;
+    }
+
+    .budget-chart {
+      width: 190px;
+      aspect-ratio: 1;
+      display: grid;
+      place-items: center;
+      margin: auto;
+      background: conic-gradient(
+        var(--primary) 0 22%,
+        #14b8a6 22% 48%,
+        #f59e0b 48% 72%,
+        #8b5cf6 72% 91%,
+        #64748b 91% 100%
+      );
+      border-radius: 50%;
+    }
+
+    .budget-chart-inner {
+      width: 126px;
+      aspect-ratio: 1;
+      display: grid;
+      place-items: center;
+      padding: 9px;
+      background: #fff;
+      border-radius: 50%;
+      text-align: center;
+    }
+
+    .budget-chart-inner strong {
+      display: block;
+      font-size: 1.12rem;
+    }
+
+    .budget-list {
+      display: grid;
+      gap: 9px;
+    }
+
+    .budget-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 8px;
+      border-bottom: 1px dashed var(--line);
+    }
+
+    .budget-row.total {
+      padding-top: 7px;
+      border-bottom: 0;
+      font-size: 1.08rem;
+      font-weight: 900;
+    }
+
+    .budget-progress {
+      height: 10px;
+      overflow: hidden;
+      margin-top: 12px;
+      background: #e8edf5;
+      border-radius: 999px;
+    }
+
+    .budget-progress-fill {
+      height: 100%;
+      background: var(--success);
+      border-radius: inherit;
+    }
+
+    .budget-progress-fill.over {
+      background: var(--danger);
+    }
+
+    .transport-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 11px;
+    }
+
+    .transport-card {
+      padding: 15px;
+      border: 2px solid var(--line);
+      background: #fff;
+      border-radius: 14px;
+    }
+
+    .transport-card.selected {
+      border-color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    .transport-icon {
+      font-size: 1.5rem;
+    }
+
+    .transport-card h3 {
+      margin: 6px 0;
+    }
+
+    .transport-card dl {
+      margin: 0 0 11px;
+    }
+
+    .transport-card dl div {
+      display: flex;
+      justify-content: space-between;
+      padding: 4px 0;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .transport-card dt,
+    .transport-card dd {
+      margin: 0;
+    }
+
+    .transport-card dd {
+      color: var(--text);
+      font-weight: 800;
+    }
+
+    .map-shell {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background: #e0f2fe;
+      border-radius: 17px;
+    }
+
+    .map-shell svg {
+      width: 100%;
+      min-height: 300px;
+      display: block;
+    }
+
+    .map-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 12px;
+      background: #fff;
+      border-top: 1px solid var(--line);
+    }
+
+    .map-legend span {
+      display: inline-flex;
+      gap: 5px;
+      align-items: center;
+      color: var(--muted);
+      font-size: 0.79rem;
+    }
+
+    .legend-dot {
+      width: 9px;
+      height: 9px;
+      background: var(--primary);
+      border-radius: 50%;
+    }
+
+    .local-box {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 13px;
+      margin-top: 16px;
+    }
+
+    .empty-state {
+      padding: 48px 20px;
+      border: 2px dashed var(--line);
+      background: #fff;
+      border-radius: var(--radius);
+      text-align: center;
+    }
+
+    .empty-icon {
+      display: block;
+      margin-bottom: 10px;
+      font-size: 3rem;
+    }
+
+    .saved-card {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .saved-details {
+      flex: 1;
+    }
+
+    .saved-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-top: 14px;
+    }
+
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 17px;
+      padding-bottom: 60px;
+    }
+
+    .info-list {
+      margin: 0;
+      padding-left: 20px;
+    }
+
+    .info-list li {
+      margin-bottom: 8px;
+    }
+
+    .site-footer {
+      padding: 27px 0;
+      color: var(--muted);
+      background: #fff;
+      border-top: 1px solid var(--line);
+      text-align: center;
+      font-size: 0.84rem;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      z-index: 100;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      background: rgba(15, 23, 42, 0.58);
+    }
+
+    .modal {
+      width: min(570px, 100%);
+      max-height: 90vh;
+      overflow: auto;
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 25px 70px rgba(15,23,42,.28);
+    }
+
+    .modal-header,
+    .modal-footer {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 19px;
+    }
+
+    .modal-header {
+      border-bottom: 1px solid var(--line);
+    }
+
+    .modal-header h2 {
+      margin: 0;
+      font-size: 1.18rem;
+    }
+
+    .modal-body {
+      padding: 19px;
+    }
+
+    .modal-footer {
+      justify-content: flex-end;
+      border-top: 1px solid var(--line);
+    }
+
+    .toast-region {
+      position: fixed;
+      z-index: 150;
+      right: 18px;
+      bottom: 18px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .toast {
+      max-width: 360px;
+      padding: 12px 15px;
+      color: #fff;
+      background: #172033;
+      border-radius: 11px;
+      box-shadow: var(--shadow);
+      animation: fadeIn 0.2s ease;
+    }
+
+    .toast.error {
+      background: var(--danger);
+    }
+
+    .loading-overlay {
+      position: fixed;
+      z-index: 200;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      color: #fff;
+      background: rgba(15, 23, 42, 0.72);
+    }
+
+    .loading-box {
+      padding: 25px 29px;
+      background: #172033;
+      border-radius: 17px;
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+
+    .spinner {
+      width: 42px;
+      height: 42px;
+      margin: 0 auto 13px;
+      border: 4px solid rgba(255,255,255,.25);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.75s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @media (max-width: 950px) {
+      .hero-grid,
+      .about-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .feature-grid,
+      .step-grid,
+      .recommendation-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .transport-grid,
+      .optimizer-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .budget-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .main-nav {
+        max-width: 66vw;
+      }
+    }
+
+    @media (max-width: 650px) {
+      .container {
+        width: min(100% - 22px, 1180px);
+      }
+
+      .demo-notice {
+        font-size: 0.7rem;
+      }
+
+      .nav-wrap {
+        min-height: 62px;
+        gap: 8px;
+      }
+
+      .brand-text {
+        display: none;
+      }
+
+      .main-nav {
+        max-width: calc(100vw - 72px);
+      }
+
+      .nav-button {
+        padding: 8px 9px;
+        font-size: 0.76rem;
+      }
+
+      .hero {
+        padding: 50px 0 44px;
+      }
+
+      .hero h1 {
+        font-size: 2.55rem;
+      }
+
+      .feature-grid,
+      .step-grid,
+      .saved-grid,
+      .recommendation-grid,
+      .transport-grid,
+      .optimizer-grid,
+      .choice-grid,
+      .form-grid,
+      .review-grid,
+      .local-box {
+        grid-template-columns: 1fr;
+      }
+
+      .field.full {
+        grid-column: auto;
+      }
+
+      .step-nav {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .result-title-row,
+      .section-title-row {
+        flex-direction: column;
+      }
+
+      .timeline-item {
+        grid-template-columns: 56px 20px 1fr;
+        gap: 7px;
+      }
+
+      .timeline-item:not(:last-child)::after {
+        left: 64px;
+      }
+
+      .timeline-actions {
+        grid-column: 3;
+      }
+
+      .day-header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .hero-stats {
+        grid-template-columns: 1fr;
+      }
+
+      .create-panel .button {
+        width: 100%;
+        min-width: 0;
+      }
+    }
+
+    @media print {
+      body {
+        background: #fff;
+      }
+
+      .demo-notice,
+      .site-header,
+      .site-footer,
+      .no-print,
+      .toast-region,
+      .modal-backdrop,
+      .loading-overlay {
+        display: none !important;
+      }
+
+      .page {
+        display: none !important;
+      }
+
+      #page-result {
+        display: block !important;
+      }
+
+      .container {
+        width: 100%;
+      }
+
+      .result-page {
+        padding: 0;
+      }
+
+      .result-hero,
+      .result-section,
+      .day-card {
+        break-inside: avoid;
+        box-shadow: none;
+      }
+
+      .result-hero {
+        color: #000;
+        background: #fff;
+        border: 2px solid #000;
+      }
+
+      .result-hero .muted {
+        color: #333;
+      }
+
+      .summary-chip {
+        color: #000;
+        border-color: #888;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="demo-notice">
+    เว็บไซต์ต้นแบบ • สถานที่ ราคา เวลา และเส้นทางทั้งหมดเป็นข้อมูลตัวอย่าง/ประมาณการ ไม่ใช่ข้อมูล Real-time
+  </div>
+
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <button class="brand" type="button" data-page="home" aria-label="ไปหน้าแรก">
+        <span class="brand-mark">✈</span>
+        <span class="brand-text">Trip Plan</span>
+      </button>
+
+      <nav class="main-nav" aria-label="เมนูหลัก">
+        <button class="nav-button active" type="button" data-page="home">หน้าแรก</button>
+        <button class="nav-button" type="button" data-page="plan">วางแผนทริป</button>
+        <button class="nav-button" type="button" data-page="saved">ทริปที่บันทึก</button>
+        <button class="nav-button" type="button" data-page="how">วิธีใช้งาน</button>
+        <button class="nav-button" type="button" data-page="about">เกี่ยวกับระบบ</button>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section id="page-home" class="page active">
+      <div class="hero">
+        <div class="container hero-grid">
+          <div>
+            <span class="eyebrow">✨ Smart Rule-Based Trip Planner</span>
+            <h1>
+              วางแผนทริปให้ลงตัว
+              <span class="gradient-text">ในไม่กี่นาที</span>
+            </h1>
+            <p class="hero-copy">
+              สร้างแผนเที่ยวรายวัน คำนวณงบประมาณ เปรียบเทียบการเดินทาง
+              ปรับแต่งกิจกรรม และบันทึกทริปได้ในเว็บเดียว
+            </p>
+            <div class="button-row">
+              <button class="button primary" type="button" data-page="plan">
+                เริ่มวางแผนทริป →
+              </button>
+              <button class="button secondary" id="demo-trip-button" type="button">
+                ▶ ลองดู Demo Trip
+              </button>
+            </div>
+          </div>
+
+          <div class="hero-card">
+            <div class="hero-map" aria-label="ตัวอย่างแผนที่ทริป">
+              <div class="hero-route"></div>
+              <div class="map-pin pin-1"><span>1</span></div>
+              <div class="map-pin pin-2"><span>2</span></div>
+              <div class="map-pin pin-3"><span>3</span></div>
+            </div>
+            <div class="hero-stats">
+              <div class="hero-stat">
+                <strong>3 วัน</strong>
+                <small>ตารางเที่ยว</small>
+              </div>
+              <div class="hero-stat">
+                <strong>9 จุด</strong>
+                <small>สถานที่แนะนำ</small>
+              </div>
+              <div class="hero-stat">
+                <strong>฿8,420</strong>
+                <small>งบตัวอย่าง</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="container">
+          <div class="section-heading">
+            <span class="eyebrow">ความสามารถของระบบ</span>
+            <h2>เครื่องมือสำคัญสำหรับทริปของคุณ</h2>
+            <p class="muted">ฟีเจอร์หลักทำงานด้วย JavaScript และข้อมูลจำลองภายในไฟล์</p>
+          </div>
+
+          <div class="feature-grid">
+            <article class="card">
+              <div class="feature-icon">🧠</div>
+              <h3>Smart Recommendation</h3>
+              <p class="muted">ให้คะแนนสถานที่ตามความสนใจ งบ และสไตล์ทริป พร้อมแสดงเหตุผล</p>
+            </article>
+            <article class="card">
+              <div class="feature-icon">🗓️</div>
+              <h3>Itinerary</h3>
+              <p class="muted">จัดกิจกรรมลงตารางรายวัน พร้อมเวลาอาหารและ Buffer การเดินทาง</p>
+            </article>
+            <article class="card">
+              <div class="feature-icon">💰</div>
+              <h3>Budget Calculator</h3>
+              <p class="muted">คำนวณค่าเดินทาง ที่พัก อาหาร กิจกรรม และค่าใช้จ่ายอื่น</p>
+            </article>
+            <article class="card">
+              <div class="feature-icon">🚆</div>
+              <h3>Transport Comparison</h3>
+              <p class="muted">เปรียบเทียบรถยนต์ รถบัส รถไฟ และเครื่องบินจากราคาและเวลา</p>
+            </article>
+            <article class="card">
+              <div class="feature-icon">🗺️</div>
+              <h3>Map Mockup</h3>
+              <p class="muted">แสดงจุดแวะบนแผนที่ SVG พร้อมปุ่มเปิดค้นหาใน Google Maps</p>
+            </article>
+            <article class="card">
+              <div class="feature-icon">💾</div>
+              <h3>LocalStorage</h3>
+              <p class="muted">บันทึก โหลด เปลี่ยนชื่อ และลบทริปได้โดยไม่ต้องใช้ฐานข้อมูล</p>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="page-plan" class="page">
+      <div class="container">
+        <div class="page-header">
+          <span class="eyebrow">6 ขั้นตอน</span>
+          <h1>สร้างแผนการเดินทาง</h1>
+          <p class="muted">กรอกข้อมูลเพื่อให้ระบบ Rule-Based สร้างทริปให้คุณ</p>
+        </div>
+
+        <div class="wizard-shell">
+          <div class="progress-card">
+            <strong id="progress-label">ขั้นตอน 1 จาก 6: ข้อมูลพื้นฐาน</strong>
+            <div class="progress-track">
+              <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            <div class="step-nav">
+              <button class="step-pill active" type="button" data-step="0">1. ข้อมูล</button>
+              <button class="step-pill" type="button" data-step="1">2. งบ</button>
+              <button class="step-pill" type="button" data-step="2">3. เดินทาง</button>
+              <button class="step-pill" type="button" data-step="3">4. ความสนใจ</button>
+              <button class="step-pill" type="button" data-step="4">5. สไตล์</button>
+              <button class="step-pill" type="button" data-step="5">6. ตรวจสอบ</button>
+            </div>
+          </div>
+
+          <form id="trip-form" class="wizard-card" novalidate>
+            <section class="wizard-step active" data-wizard-step="0">
+              <h2>ข้อมูลพื้นฐาน</h2>
+              <p class="muted">เลือกต้นทาง ปลายทาง วันที่ และจำนวนผู้เดินทาง</p>
+              <div class="form-grid">
+                <div class="field">
+                  <label for="origin">ต้นทาง</label>
+                  <select id="origin" name="origin">
+                    <option value="bangkok">กรุงเทพฯ</option>
+                    <option value="chiangmai">เชียงใหม่</option>
+                    <option value="phuket">ภูเก็ต</option>
+                    <option value="krabi">กระบี่</option>
+                    <option value="ayutthaya">พระนครศรีอยุธยา</option>
+                    <option value="chonburi">ชลบุรี</option>
+                    <option value="kanchanaburi">กาญจนบุรี</option>
+                    <option value="chiangrai">เชียงราย</option>
+                    <option value="korat">นครราชสีมา</option>
+                    <option value="suratthani">สุราษฎร์ธานี</option>
+                  </select>
+                </div>
+
+                <div class="field">
+                  <label for="destination">ปลายทาง</label>
+                  <select id="destination" name="destination">
+                    <option value="chiangmai">เชียงใหม่</option>
+                    <option value="bangkok">กรุงเทพฯ</option>
+                    <option value="phuket">ภูเก็ต</option>
+                    <option value="krabi">กระบี่</option>
+                    <option value="ayutthaya">พระนครศรีอยุธยา</option>
+                    <option value="chonburi">ชลบุรี</option>
+                    <option value="kanchanaburi">กาญจนบุรี</option>
+                    <option value="chiangrai">เชียงราย</option>
+                    <option value="korat">นครราชสีมา</option>
+                    <option value="suratthani">สุราษฎร์ธานี</option>
+                  </select>
+                </div>
+
+                <div class="field">
+                  <label for="start-date">วันเริ่มเดินทาง</label>
+                  <input id="start-date" name="startDate" type="date">
+                </div>
+
+                <div class="field">
+                  <label for="days">จำนวนวัน</label>
+                  <select id="days" name="days">
+                    <option value="1">1 วัน</option>
+                    <option value="2">2 วัน</option>
+                    <option value="3" selected>3 วัน</option>
+                    <option value="4">4 วัน</option>
+                    <option value="5">5 วัน</option>
+                  </select>
+                </div>
+
+                <div class="field">
+                  <label for="people">จำนวนผู้เดินทาง</label>
+                  <input id="people" name="people" type="number" min="1" max="20" value="2">
+                </div>
+
+                <div class="field">
+                  <label for="trip-name">ชื่อทริป</label>
+                  <input id="trip-name" name="tripName" maxlength="60" value="ทริปวันหยุดของฉัน">
+                </div>
+              </div>
+            </section>
+
+            <section class="wizard-step" data-wizard-step="1">
+              <h2>งบประมาณ</h2>
+              <p class="muted">ระบุงบรวม รูปแบบที่พัก และค่าอาหาร</p>
+              <div class="form-grid">
+                <div class="field">
+                  <label for="budget">งบประมาณรวม (บาท)</label>
+                  <input id="budget" name="budget" type="number" min="1000" step="100" value="18000">
+                </div>
+
+                <div class="field">
+                  <label for="accommodation">ระดับที่พัก</label>
+                  <select id="accommodation" name="accommodation">
+                    <option value="economy">ประหยัด — 900 บาท/ห้อง/คืน</option>
+                    <option value="comfort" selected>สบาย — 1,800 บาท/ห้อง/คืน</option>
+                    <option value="premium">พรีเมียม — 3,200 บาท/ห้อง/คืน</option>
+                  </select>
+                </div>
+
+                <div class="field">
+                  <label for="food-style">รูปแบบอาหาร</label>
+                  <select id="food-style" name="foodStyle">
+                    <option value="local">อาหารท้องถิ่น — 450 บาท/คน/วัน</option>
+                    <option value="mixed" selected>ผสมผสาน — 750 บาท/คน/วัน</option>
+                    <option value="cafe">คาเฟ่และร้านยอดนิยม — 1,100 บาท/คน/วัน</option>
+                  </select>
+                </div>
+              </div>
+
+              <p class="demo-label" style="margin-top:18px">
+                ราคาทั้งหมดเป็นข้อมูลประมาณการเพื่อสาธิตระบบ
+              </p>
+            </section>
+
+            <section class="wizard-step" data-wizard-step="2">
+              <h2>รูปแบบการเดินทาง</h2>
+              <p class="muted">เลือกวิธีเดินทาง หรือให้ระบบเลือกจากราคาและเวลา</p>
+              <div class="choice-grid">
+                <label class="choice">
+                  <input type="radio" name="transport" value="best" checked>
+                  <span class="choice-content">
+                    <strong>✨ ให้ระบบเลือก</strong>
+                    <small>วิเคราะห์ราคาและเวลา</small>
+                  </span>
+                </label>
+                <label class="choice">
+                  <input type="radio" name="transport" value="car">
+                  <span class="choice-content">
+                    <strong>🚗 รถยนต์</strong>
+                    <small>ยืดหยุ่นและแวะระหว่างทางได้</small>
+                  </span>
+                </label>
+                <label class="choice">
+                  <input type="radio" name="transport" value="bus">
+                  <span class="choice-content">
+                    <strong>🚌 รถบัส</strong>
+                    <small>เน้นความประหยัด</small>
+                  </span>
+                </label>
+                <label class="choice">
+                  <input type="radio" name="transport" value="train">
+                  <span class="choice-content">
+                    <strong>🚆 รถไฟ</strong>
+                    <small>เหมาะกับการเดินทางสบาย ๆ</small>
+                  </span>
+                </label>
+                <label class="choice">
+                  <input type="radio" name="transport" value="plane">
+                  <span class="choice-content">
+                    <strong>✈️ เครื่องบิน</strong>
+                    <small>เน้นความรวดเร็ว</small>
+                  </span>
+                </label>
+              </div>
+            </section>
+
+            <section class="wizard-step" data-wizard-step="3">
+              <h2>ความสนใจ</h2>
+              <p class="muted">เลือกอย่างน้อยหนึ่งข้อ</p>
+              <div class="choice-grid">
+                <label class="choice">
+                  <input type="checkbox" name="interests" value="culture" checked>
+                  <span class="choice-content">
+                    <strong>🏛️ วัฒนธรรม</strong>
+                    <small>วัด พิพิธภัณฑ์ และประวัติศาสตร์</small>
+                  </span>
+                </label>
+                <label class="choice">
+                  <input type="checkbox" name="interests" value="nature" checked>
+                  <span class="choice-content">
+                    <strong>🌿 ธรรมชาติ</strong>
+                    <small>ภูเขา สวน และจุดชมวิว</small>
+                  </span>
+                </label>
+                <label class="choice">
+                  <input type="checkbox" name="interests" value="food">
+                  <span class="choice-content">
+                    <strong>🍜 อาหาร</strong>
+                    <small>ตลาดและอาหารท้องถิ่น</small>
+                  </span>
+                </label>
+                <label class="choice">
+                  <input type="checkbox" name="interests" value="cafe">
+                  <span class="choice-content">
+                    <strong>☕ คาเฟ่</strong>
+                    <small>ร้านกาแฟและมุมถ่ายภาพ</small>
+                  </span>
+                </label>
+                <label class="choice">
+                  <input type="checkbox" name="interests" value="shopping">
+                  <span class="choice-content">
+                    <strong>🛍️ ช้อปปิ้ง</strong>
+                    <small>ตลาดและย่านการค้า</small>
+                  </span>
+                </label>
+                <label class="choice">
+                  <input type="checkbox" name="interests" value="adventure">
+                  <span class="choice-content">
+                    <strong>🧗 ผจญภัย</strong>
+                    <small>กิจกรรมกลางแจ้ง</small>
+                  </span>
+                </label>
+              </div>
+            </section>
+
+            <section class="wizard-step" data-wizard-step="4">
+              <h2>สไตล์ทริป</h2>
+              <p class="muted">จำนวนกิจกรรมต่อวันจะเปลี่ยนตามรูปแบบที่เลือก</p>
+              <div class="choice-grid">
+                <label class="choice">
+                  <input type="radio" name="pace" value="relaxed">
+                  <span class="choice-content">
+                    <strong>🌤️ สบาย ๆ</strong>
+                    <small>ประมาณ 2 กิจกรรมต่อวัน</small>
+                  </span>
+                </label>
+                <label class="choice">
+                  <input type="radio" name="pace" value="balanced" checked>
+                  <span class="choice-content">
+                    <strong>⚖️ สมดุล</strong>
+                    <small>ประมาณ 3 กิจกรรมต่อวัน</small>
+                  </span>
+                </label>
+                <label class="choice">
+                  <input type="radio" name="pace" value="packed">
+                  <span class="choice-content">
+                    <strong>⚡ จัดเต็ม</strong>
+                    <small>ประมาณ 4 กิจกรรมต่อวัน</small>
+                  </span>
+                </label>
+              </div>
+
+              <div class="form-grid">
+                <div class="field full">
+                  <label for="notes">หมายเหตุเพิ่มเติม</label>
+                  <textarea id="notes" name="notes" maxlength="300"
+                    placeholder="เช่น ต้องการพักช่วงบ่าย หรือเดินทางพร้อมผู้สูงอายุ"></textarea>
+                </div>
+              </div>
+            </section>
+
+            <section class="wizard-step" data-wizard-step="5">
+              <h2>ตรวจสอบข้อมูล</h2>
+              <p class="muted">ตรวจสอบข้อมูลก่อนสร้างแผน สามารถย้อนกลับไปแก้ไขได้</p>
+              <div id="wizard-review" class="review-grid"></div>
+
+              <div class="create-panel">
+                <p>เมื่อข้อมูลถูกต้องแล้ว กดปุ่มด้านล่างเพื่อสร้างแผนทริป</p>
+                <button
+                  class="button primary"
+                  id="generate-trip-button"
+                  type="button"
+                >
+                  ✨ สร้าง Smart Trip Plan
+                </button>
+              </div>
+            </section>
+
+            <div class="wizard-footer">
+              <button class="button secondary" id="previous-step" type="button">
+                ← ย้อนกลับ
+              </button>
+              <button class="button primary" id="next-step" type="button">
+                ถัดไป →
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <section id="page-result" class="page">
+      <div class="container result-page">
+        <div id="result-content"></div>
+      </div>
+    </section>
+
+    <section id="page-saved" class="page">
+      <div class="container">
+        <div class="page-header">
+          <span class="eyebrow">LocalStorage</span>
+          <h1>ทริปที่บันทึกไว้</h1>
+          <p class="muted">ข้อมูลอยู่เฉพาะในเบราว์เซอร์และอุปกรณ์เครื่องนี้</p>
+        </div>
+        <div id="saved-content" style="padding-bottom:60px"></div>
+      </div>
+    </section>
+
+    <section id="page-how" class="page">
+      <div class="container">
+        <div class="page-header">
+          <span class="eyebrow">How It Works</span>
+          <h1>วิธีใช้งาน</h1>
+          <p class="muted">สร้างแผนทริปได้ภายใน 4 ขั้นตอนหลัก</p>
+        </div>
+
+        <div class="step-grid" style="padding-bottom:60px">
+          <article class="card">
+            <div class="feature-icon">1</div>
+            <h3>กรอกข้อมูล</h3>
+            <p class="muted">เลือกปลายทาง วันที่ จำนวนคน งบประมาณ และความสนใจ</p>
+          </article>
+          <article class="card">
+            <div class="feature-icon">2</div>
+            <h3>สร้าง Smart Plan</h3>
+            <p class="muted">ระบบให้คะแนนสถานที่และจัดลงตารางตามกฎที่กำหนด</p>
+          </article>
+          <article class="card">
+            <div class="feature-icon">3</div>
+            <h3>ปรับแต่ง</h3>
+            <p class="muted">เพิ่ม ลบ แก้ไขกิจกรรม หรือเลือกวิธีเดินทางใหม่</p>
+          </article>
+          <article class="card">
+            <div class="feature-icon">4</div>
+            <h3>บันทึกและแชร์</h3>
+            <p class="muted">บันทึกในอุปกรณ์ แชร์สรุป หรือพิมพ์แผนการเดินทาง</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="page-about" class="page">
+      <div class="container">
+        <div class="page-header">
+          <span class="eyebrow">Prototype Information</span>
+          <h1>เกี่ยวกับระบบ</h1>
+          <p class="muted">เว็บต้นแบบสำหรับสาธิต Smart Trip Planner แบบ Rule-Based</p>
+        </div>
+
+        <div class="about-grid">
+          <article class="card">
+            <h2>เทคโนโลยี</h2>
+            <ul class="info-list">
+              <li>HTML5, CSS3 และ Vanilla JavaScript</li>
+              <li>ทำงานจากไฟล์ index.html เพียงไฟล์เดียว</li>
+              <li>ไม่ใช้ Backend, Database หรือ API Key</li>
+              <li>LocalStorage สำหรับจัดเก็บทริป</li>
+              <li>SVG สำหรับแผนที่จำลอง</li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h2>การแนะนำแบบ Rule-Based</h2>
+            <ul class="info-list">
+              <li>เพิ่มคะแนนเมื่อสถานที่ตรงกับความสนใจ</li>
+              <li>เพิ่มคะแนนสำหรับสถานที่ที่เหมาะกับงบ</li>
+              <li>พิจารณาระยะเวลากิจกรรมและสไตล์ทริป</li>
+              <li>จัดตารางพร้อม Buffer ระหว่างกิจกรรม</li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h2>ข้อจำกัด</h2>
+            <p class="muted">
+              ระบบไม่เชื่อมต่อผู้ให้บริการจอง โรงแรม ขนส่ง สภาพอากาศ
+              หรือแผนที่แบบ Real-time
+            </p>
+            <p class="demo-label">ควรตรวจสอบข้อมูลจริงก่อนเดินทาง</p>
+          </article>
+
+          <article class="card">
+            <h2>ความเป็นส่วนตัว</h2>
+            <p class="muted">
+              ระบบไม่ส่งข้อมูลไปยังเซิร์ฟเวอร์ ข้อมูลที่บันทึกจะอยู่ใน
+              LocalStorage ของ Chrome บนอุปกรณ์ที่ใช้งานเท่านั้น
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    Trip Plan Prototype • Estimated/Demo Data • ไม่ใช่บริการจองการเดินทาง
+  </footer>
+
+  <div id="modal-backdrop" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="modal-title">แก้ไขกิจกรรม</h2>
+        <button class="icon-button" id="modal-close" type="button" aria-label="ปิด">✕</button>
+      </div>
+      <div class="modal-body" id="modal-body"></div>
+      <div class="modal-footer">
+        <button class="button secondary" id="modal-cancel" type="button">ยกเลิก</button>
+        <button class="button primary" id="modal-save" type="button">บันทึก</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-region" class="toast-region" aria-live="polite"></div>
+
+  <div id="loading-overlay" class="loading-overlay hidden" aria-live="polite">
+    <div class="loading-box">
+      <div class="spinner"></div>
+      <strong id="loading-text">กำลังวิเคราะห์ข้อมูล...</strong>
+      <div style="margin-top:5px;font-size:.8rem;opacity:.75">
+        Rule-Based Recommendation Engine
+      </div>
+    </div>
+  </div>
+
+  <script>
+    "use strict";
+
+    /* =========================
+       1. MOCK DATA
+    ========================= */
+
+    var STORAGE_KEY = "tripPlanSmartPlannerV2";
+
+    var cities = {
+      bangkok: createCity(
+        "กรุงเทพฯ", "🏙️", "Bangkok Thailand", 13.7563, 100.5018,
+        ["โรงแรมเมืองกรุงจำลอง", "โฮสเทลริมแม่น้ำจำลอง"],
+        ["ผัดไทย", "อาหารเยาวราช", "ข้าวมันไก่"],
+        [
+          ["พระบรมมหาราชวัง", "🏯", "culture", 500, 120, 160, 120],
+          ["วัดอรุณ", "🛕", "culture", 200, 90, 225, 230],
+          ["เยาวราช", "🍜", "food", 250, 120, 330, 205],
+          ["สวนเบญจกิติ", "🌳", "nature", 0, 90, 475, 225],
+          ["ตลาดนัดจตุจักร", "🛍️", "shopping", 0, 150, 370, 75],
+          ["คาเฟ่ย่านอารีย์", "☕", "cafe", 180, 90, 360, 130],
+          ["คลองบางกะเจ้า", "🚲", "adventure", 150, 180, 520, 290],
+          ["หอศิลปวัฒนธรรม", "🎨", "culture", 0, 100, 390, 170]
+        ]
+      ),
+      chiangmai: createCity(
+        "เชียงใหม่", "⛰️", "Chiang Mai Thailand", 18.7883, 98.9853,
+        ["โรงแรมล้านนาจำลอง", "เกสต์เฮาส์นิมมานจำลอง"],
+        ["ข้าวซอย", "ไส้อั่ว", "น้ำพริกหนุ่ม"],
+        [
+          ["วัดพระธาตุดอยสุเทพ", "🛕", "culture", 50, 120, 145, 95],
+          ["ประตูท่าแพ", "🏯", "culture", 0, 75, 395, 185],
+          ["วัดเจดีย์หลวง", "🏛️", "culture", 50, 90, 340, 205],
+          ["สวนพฤกษศาสตร์", "🌿", "nature", 150, 150, 105, 240],
+          ["จุดชมวิวดอยปุย", "🌄", "nature", 0, 150, 85, 65],
+          ["ตลาดวโรรส", "🍜", "food", 200, 110, 445, 220],
+          ["ถนนคนเดิน", "🛍️", "shopping", 0, 140, 395, 270],
+          ["คาเฟ่นิมมาน", "☕", "cafe", 180, 90, 275, 155],
+          ["เส้นทางเดินป่าจำลอง", "🥾", "adventure", 350, 180, 125, 310]
+        ]
+      ),
+      phuket: createCity(
+        "ภูเก็ต", "🏝️", "Phuket Thailand", 7.8804, 98.3923,
+        ["โรงแรมชายหาดจำลอง", "รีสอร์ตภูเก็ตจำลอง"],
+        ["หมี่ฮกเกี้ยน", "อาหารทะเล", "โอ้เอ๋ว"],
+        [
+          ["ย่านเมืองเก่าภูเก็ต", "🏘️", "culture", 0, 120, 390, 155],
+          ["หาดกะตะ", "🏖️", "nature", 0, 150, 260, 275],
+          ["แหลมพรหมเทพ", "🌅", "nature", 0, 100, 245, 325],
+          ["จุดชมวิวกะรน", "📷", "nature", 0, 80, 250, 235],
+          ["ตลาดอาหารท้องถิ่น", "🍤", "food", 300, 120, 410, 205],
+          ["คาเฟ่ริมทะเล", "☕", "cafe", 250, 100, 175, 185],
+          ["ตลาดนัดกลางคืน", "🛍️", "shopping", 0, 130, 435, 250],
+          ["พายคายัคจำลอง", "🛶", "adventure", 650, 180, 525, 100]
+        ]
+      ),
+      krabi: createCity(
+        "กระบี่", "🏖️", "Krabi Thailand", 8.0863, 98.9063,
+        ["รีสอร์ตอ่าวนางจำลอง", "โรงแรมเมืองกระบี่จำลอง"],
+        ["โรตี", "อาหารทะเล", "ข้าวยำ"],
+        [
+          ["อ่าวนาง", "🏖️", "nature", 0, 150, 180, 215],
+          ["สระมรกตจำลอง", "💧", "nature", 200, 180, 470, 270],
+          ["วัดถ้ำเสือ", "🛕", "culture", 0, 150, 390, 105],
+          ["ตลาดกลางคืนกระบี่", "🍜", "food", 180, 120, 355, 210],
+          ["คาเฟ่วิวเขา", "☕", "cafe", 190, 90, 320, 150],
+          ["จุดชมวิวเขาขนาบน้ำ", "🌄", "nature", 100, 120, 420, 180],
+          ["พายเรือจำลอง", "🛶", "adventure", 500, 180, 540, 130],
+          ["ถนนคนเดินกระบี่", "🛍️", "shopping", 0, 120, 370, 250]
+        ]
+      ),
+      ayutthaya: createCity(
+        "พระนครศรีอยุธยา", "🏛️", "Ayutthaya Thailand", 14.3532, 100.5689,
+        ["โรงแรมริมน้ำจำลอง", "เกสต์เฮาส์เกาะเมืองจำลอง"],
+        ["กุ้งแม่น้ำ", "โรตีสายไหม", "ก๋วยเตี๋ยวเรือ"],
+        [
+          ["วัดมหาธาตุ", "🛕", "culture", 50, 100, 350, 165],
+          ["วัดไชยวัฒนาราม", "🏯", "culture", 50, 110, 195, 245],
+          ["วัดพระศรีสรรเพชญ์", "🏛️", "culture", 50, 100, 295, 135],
+          ["อุทยานประวัติศาสตร์", "🌳", "nature", 50, 150, 300, 200],
+          ["ตลาดของกินท้องถิ่น", "🍜", "food", 180, 100, 430, 260],
+          ["คาเฟ่ริมน้ำ", "☕", "cafe", 170, 90, 210, 285],
+          ["ปั่นจักรยานรอบเมือง", "🚲", "adventure", 120, 180, 390, 90],
+          ["ตลาดน้ำจำลอง", "🛍️", "shopping", 0, 120, 500, 215]
+        ]
+      ),
+      chonburi: createCity(
+        "ชลบุรี", "🌊", "Chonburi Thailand", 13.3611, 100.9847,
+        ["โรงแรมบางแสนจำลอง", "รีสอร์ตพัทยาจำลอง"],
+        ["ข้าวหลาม", "อาหารทะเล", "ก๋วยเตี๋ยวปลา"],
+        [
+          ["ชายหาดบางแสน", "🏖️", "nature", 0, 150, 205, 220],
+          ["เขาสามมุข", "🌄", "nature", 0, 100, 240, 140],
+          ["ตลาดหนองมน", "🍜", "food", 180, 100, 300, 170],
+          ["พิพิธภัณฑ์สัตว์น้ำจำลอง", "🐠", "culture", 180, 120, 265, 250],
+          ["คาเฟ่ริมทะเล", "☕", "cafe", 220, 90, 180, 280],
+          ["ตลาดกลางคืน", "🛍️", "shopping", 0, 120, 390, 250],
+          ["กิจกรรมทางน้ำจำลอง", "🏄", "adventure", 550, 150, 480, 300],
+          ["สวนสาธารณะชายทะเล", "🌳", "nature", 0, 90, 350, 110]
+        ]
+      ),
+      kanchanaburi: createCity(
+        "กาญจนบุรี", "🌉", "Kanchanaburi Thailand", 14.0228, 99.5328,
+        ["โรงแรมริมแควจำลอง", "รีสอร์ตธรรมชาติจำลอง"],
+        ["แกงป่า", "ปลาคัง", "อาหารพื้นบ้าน"],
+        [
+          ["สะพานข้ามแม่น้ำแคว", "🌉", "culture", 0, 100, 360, 155],
+          ["พิพิธภัณฑ์สงครามจำลอง", "🏛️", "culture", 100, 100, 390, 190],
+          ["น้ำตกเอราวัณจำลอง", "💦", "nature", 300, 210, 150, 95],
+          ["จุดชมวิวแม่น้ำแคว", "🌄", "nature", 0, 100, 295, 240],
+          ["ตลาดอาหารพื้นบ้าน", "🍜", "food", 180, 110, 420, 245],
+          ["คาเฟ่ริมแคว", "☕", "cafe", 190, 90, 320, 280],
+          ["ล่องแพจำลอง", "🛶", "adventure", 600, 180, 220, 310],
+          ["ตลาดของฝาก", "🛍️", "shopping", 0, 100, 460, 170]
+        ]
+      ),
+      chiangrai: createCity(
+        "เชียงราย", "🏔️", "Chiang Rai Thailand", 19.9105, 99.8406,
+        ["โรงแรมเมืองเชียงรายจำลอง", "รีสอร์ตภูเขาจำลอง"],
+        ["ขนมจีนน้ำเงี้ยว", "ไส้อั่ว", "ชาเหนือ"],
+        [
+          ["วัดร่องขุ่น", "🛕", "culture", 100, 120, 410, 270],
+          ["วัดร่องเสือเต้น", "🏯", "culture", 100, 100, 350, 130],
+          ["พิพิธภัณฑ์บ้านดำ", "🏛️", "culture", 80, 110, 310, 80],
+          ["ไร่ชาจำลอง", "🍃", "nature", 150, 150, 145, 95],
+          ["จุดชมวิวภูเขา", "🌄", "nature", 0, 120, 110, 200],
+          ["ตลาดกลางคืนเชียงราย", "🍜", "food", 180, 120, 390, 225],
+          ["คาเฟ่ชาเหนือ", "☕", "cafe", 170, 90, 260, 160],
+          ["เส้นทางเดินป่า", "🥾", "adventure", 350, 180, 125, 300]
+        ]
+      ),
+      korat: createCity(
+        "นครราชสีมา", "🌻", "Nakhon Ratchasima Thailand", 14.9799, 102.0977,
+        ["โรงแรมเมืองโคราชจำลอง", "รีสอร์ตเขาใหญ่จำลอง"],
+        ["ผัดหมี่โคราช", "ส้มตำ", "ไก่ย่าง"],
+        [
+          ["อนุสาวรีย์ย่าโม", "🏛️", "culture", 0, 75, 380, 185],
+          ["พิพิธภัณฑ์เมืองจำลอง", "🖼️", "culture", 100, 100, 410, 220],
+          ["อุทยานธรรมชาติจำลอง", "🌿", "nature", 200, 180, 135, 100],
+          ["จุดชมวิวเขาใหญ่จำลอง", "🌄", "nature", 100, 150, 115, 245],
+          ["ตลาดอาหารโคราช", "🍜", "food", 180, 110, 430, 265],
+          ["คาเฟ่สวนดอกไม้", "☕", "cafe", 190, 90, 255, 150],
+          ["ปั่นจักรยานธรรมชาติ", "🚲", "adventure", 250, 160, 170, 300],
+          ["ตลาดของฝาก", "🛍️", "shopping", 0, 100, 480, 170]
+        ]
+      ),
+      suratthani: createCity(
+        "สุราษฎร์ธานี", "🌴", "Surat Thani Thailand", 9.1382, 99.3215,
+        ["โรงแรมเมืองสุราษฎร์จำลอง", "รีสอร์ตธรรมชาติจำลอง"],
+        ["หอยนางรม", "ขนมจีน", "อาหารทะเล"],
+        [
+          ["สวนสาธารณะริมแม่น้ำ", "🌳", "nature", 0, 100, 350, 210],
+          ["ตลาดศาลเจ้า", "🍜", "food", 180, 110, 410, 240],
+          ["ศาลหลักเมือง", "🏛️", "culture", 0, 75, 380, 180],
+          ["ป่าต้นน้ำจำลอง", "🌿", "nature", 150, 180, 150, 110],
+          ["คาเฟ่ริมคลอง", "☕", "cafe", 180, 90, 290, 260],
+          ["ตลาดของฝาก", "🛍️", "shopping", 0, 100, 460, 190],
+          ["ล่องเรือจำลอง", "🛶", "adventure", 500, 150, 190, 290],
+          ["พิพิธภัณฑ์ท้องถิ่น", "🖼️", "culture", 100, 100, 330, 145]
+        ]
+      )
+    };
+
+    function createCity(name, emoji, query, lat, lng, hotels, foods, placeRows) {
+      return {
+        name: name,
+        emoji: emoji,
+        query: query,
+        lat: lat,
+        lng: lng,
+        hotels: hotels,
+        foods: foods,
+        places: placeRows.map(function (row, index) {
+          return {
+            id: query.toLowerCase().replace(/[^a-z0-9]/g, "") + "-" + index,
+            name: row[0],
+            emoji: row[1],
+            category: row[2],
+            cost: row[3],
+            duration: row[4],
+            x: row[5],
+            y: row[6],
+            distanceScore: Math.round(
+              Math.abs(row[5] - 350) / 20 + Math.abs(row[6] - 180) / 20
+            )
+          };
+        })
+      };
+    }
+
+    var interestLabels = {
+      culture: "วัฒนธรรม",
+      nature: "ธรรมชาติ",
+      food: "อาหาร",
+      cafe: "คาเฟ่",
+      shopping: "ช้อปปิ้ง",
+      adventure: "ผจญภัย"
+    };
+
+    var paceLabels = {
+      relaxed: "สบาย ๆ",
+      balanced: "สมดุล",
+      packed: "จัดเต็ม"
+    };
+
+    var accommodationData = {
+      economy: { label: "ประหยัด", rate: 900 },
+      comfort: { label: "สบาย", rate: 1800 },
+      premium: { label: "พรีเมียม", rate: 3200 }
+    };
+
+    var foodData = {
+      local: { label: "อาหารท้องถิ่น", daily: 450 },
+      mixed: { label: "ผสมผสาน", daily: 750 },
+      cafe: { label: "คาเฟ่และร้านยอดนิยม", daily: 1100 }
+    };
+
+    var stepNames = [
+      "ข้อมูลพื้นฐาน",
+      "งบประมาณ",
+      "การเดินทาง",
+      "ความสนใจ",
+      "สไตล์ทริป",
+      "ตรวจสอบข้อมูล"
+    ];
+
+    /* =========================
+       2. STATE AND UTILITIES
+    ========================= */
+
+    var currentStep = 0;
+    var currentTrip = null;
+    var modalSaveHandler = null;
+    var isGenerating = false;
+
+    function $(selector, root) {
+      return (root || document).querySelector(selector);
+    }
+
+    function $$(selector, root) {
+      return Array.prototype.slice.call(
+        (root || document).querySelectorAll(selector)
+      );
+    }
+
+    function cloneData(data) {
+      return JSON.parse(JSON.stringify(data));
+    }
+
+    function escapeHTML(value) {
+      return String(value == null ? "" : value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function createId() {
+      return "trip-" + Date.now() + "-" + Math.random().toString(16).slice(2);
+    }
+
+    function formatMoney(value) {
+      return new Intl.NumberFormat("th-TH", {
+        style: "currency",
+        currency: "THB",
+        maximumFractionDigits: 0
+      }).format(Number(value) || 0);
+    }
+
+    function toISODate(date) {
+      var year = date.getFullYear();
+      var month = String(date.getMonth() + 1).padStart(2, "0");
+      var day = String(date.getDate()).padStart(2, "0");
+      return year + "-" + month + "-" + day;
+    }
+
+    function parseDate(dateString) {
+      return new Date(dateString + "T12:00:00");
+    }
+
+    function addDays(dateString, amount) {
+      var date = parseDate(dateString);
+      date.setDate(date.getDate() + amount);
+      return date;
+    }
+
+    function formatDate(date) {
+      return new Intl.DateTimeFormat("th-TH", {
+        day: "numeric",
+        month: "short",
+        year: "numeric"
+      }).format(date);
+    }
+
+    function minutesToTime(minutes) {
+      var safeMinutes = Math.max(0, Number(minutes) || 0);
+      var hours = Math.floor(safeMinutes / 60) % 24;
+      var mins = safeMinutes % 60;
+      return String(hours).padStart(2, "0") + ":" +
+        String(mins).padStart(2, "0");
+    }
+
+    function timeToMinutes(time) {
+      if (!time || time.indexOf(":") === -1) return null;
+      var parts = time.split(":");
+      var hours = Number(parts[0]);
+      var minutes = Number(parts[1]);
+
+      if (!Number.isFinite(hours) || !Number.isFinite(minutes)) return null;
+      return hours * 60 + minutes;
+    }
+
+    function showToast(message, type) {
+      var toast = document.createElement("div");
+      toast.className = "toast" + (type === "error" ? " error" : "");
+      toast.textContent = message;
+      $("#toast-region").appendChild(toast);
+
+      window.setTimeout(function () {
+        toast.remove();
+      }, 3400);
+    }
+
+    function showLoading(text) {
+      $("#loading-text").textContent = text || "กำลังวิเคราะห์ข้อมูล...";
+      $("#loading-overlay").classList.remove("hidden");
+    }
+
+    function hideLoading() {
+      $("#loading-overlay").classList.add("hidden");
+    }
+
+    function showPage(pageName) {
+      $$(".page").forEach(function (page) {
+        page.classList.remove("active");
+      });
+
+      var page = $("#page-" + pageName);
+      if (!page) return;
+
+      page.classList.add("active");
+
+      $$(".nav-button").forEach(function (button) {
+        button.classList.toggle("active", button.dataset.page === pageName);
+      });
+
+      if (pageName === "saved") {
+        renderSavedTrips();
+      }
+
+      if (pageName === "plan") {
+        renderWizardStep();
+      }
+
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    /* =========================
+       3. WIZARD
+    ========================= */
+
+    function collectPlan() {
+      var formData = new FormData($("#trip-form"));
+
+      return {
+        origin: formData.get("origin"),
+        destination: formData.get("destination"),
+        startDate: formData.get("startDate"),
+        days: Number(formData.get("days")),
+        people: Number(formData.get("people")),
+        tripName: String(formData.get("tripName") || "").trim() ||
+          "ทริปของฉัน",
+        budget: Number(formData.get("budget")),
+        accommodation: formData.get("accommodation"),
+        foodStyle: formData.get("foodStyle"),
+        transport: formData.get("transport"),
+        interests: formData.getAll("interests"),
+        pace: formData.get("pace"),
+        notes: String(formData.get("notes") || "").trim()
+      };
+    }
+
+    function validateStep(step) {
+      var plan = collectPlan();
+
+      if (step === 0) {
+        if (!plan.startDate) {
+          showToast("กรุณาเลือกวันเริ่มเดินทาง", "error");
+          return false;
+        }
+
+        if (!plan.origin || !plan.destination) {
+          showToast("กรุณาเลือกต้นทางและปลายทาง", "error");
+          return false;
+        }
+
+        if (plan.people < 1 || plan.people > 20) {
+          showToast("จำนวนผู้เดินทางต้องอยู่ระหว่าง 1–20 คน", "error");
+          return false;
+        }
+      }
+
+      if (step === 1) {
+        if (!plan.budget || plan.budget < 1000) {
+          showToast("กรุณาระบุงบประมาณอย่างน้อย 1,000 บาท", "error");
+          return false;
+        }
+      }
+
+      if (step === 3) {
+        if (plan.interests.length === 0) {
+          showToast("กรุณาเลือกความสนใจอย่างน้อย 1 ข้อ", "error");
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+    function validateAll(plan) {
+      if (!plan.startDate) {
+        showToast("กรุณาเลือกวันเริ่มเดินทาง", "error");
+        currentStep = 0;
+        renderWizardStep();
+        return false;
+      }
+
+      if (!plan.origin || !plan.destination) {
+        showToast("กรุณาเลือกต้นทางและปลายทาง", "error");
+        currentStep = 0;
+        renderWizardStep();
+        return false;
+      }
+
+      if (plan.people < 1 || plan.people > 20) {
+        showToast("จำนวนผู้เดินทางไม่ถูกต้อง", "error");
+        currentStep = 0;
+        renderWizardStep();
+        return false;
+      }
+
+      if (!plan.budget || plan.budget < 1000) {
+        showToast("งบประมาณต้องไม่น้อยกว่า 1,000 บาท", "error");
+        currentStep = 1;
+        renderWizardStep();
+        return false;
+      }
+
+      if (!plan.transport) {
+        showToast("กรุณาเลือกรูปแบบการเดินทาง", "error");
+        currentStep = 2;
+        renderWizardStep();
+        return false;
+      }
+
+      if (!plan.interests || plan.interests.length === 0) {
+        showToast("กรุณาเลือกความสนใจอย่างน้อย 1 ข้อ", "error");
+        currentStep = 3;
+        renderWizardStep();
+        return false;
+      }
+
+      if (!plan.pace) {
+        showToast("กรุณาเลือกสไตล์ทริป", "error");
+        currentStep = 4;
+        renderWizardStep();
+        return false;
+      }
+
+      return true;
+    }
+
+    function renderWizardStep() {
+      $$(".wizard-step").forEach(function (step, index) {
+        step.classList.toggle("active", index === currentStep);
+      });
+
+      $$(".step-pill").forEach(function (button, index) {
+        button.classList.toggle("active", index === currentStep);
+      });
+
+      $("#progress-fill").style.width =
+        ((currentStep + 1) / 6 * 100) + "%";
+
+      $("#progress-label").textContent =
+        "ขั้นตอน " + (currentStep + 1) + " จาก 6: " +
+        stepNames[currentStep];
+
+      $("#previous-step").disabled = currentStep === 0;
+      $("#next-step").classList.toggle("hidden", currentStep === 5);
+
+      if (currentStep === 5) {
+        renderReview();
+      }
+    }
+
+    function renderReview() {
+      var plan = collectPlan();
+      var origin = cities[plan.origin];
+      var destination = cities[plan.destination];
+
+      $("#wizard-review").innerHTML =
+        '<div class="review-item"><span>ชื่อทริป</span><strong>' +
+        escapeHTML(plan.tripName) + '</strong></div>' +
+        '<div class="review-item"><span>เส้นทาง</span><strong>' +
+        escapeHTML(origin.name) + " → " +
+        escapeHTML(destination.name) + '</strong></div>' +
+        '<div class="review-item"><span>วันเดินทาง</span><strong>' +
+        (plan.startDate ? formatDate(parseDate(plan.startDate)) : "-") +
+        '</strong></div>' +
+        '<div class="review-item"><span>ระยะเวลา</span><strong>' +
+        plan.days + " วัน • " + plan.people + ' คน</strong></div>' +
+        '<div class="review-item"><span>งบประมาณ</span><strong>' +
+        formatMoney(plan.budget) + '</strong></div>' +
+        '<div class="review-item"><span>ที่พัก</span><strong>' +
+        escapeHTML(accommodationData[plan.accommodation].label) +
+        '</strong></div>' +
+        '<div class="review-item"><span>ความสนใจ</span><strong>' +
+        plan.interests.map(function (item) {
+          return interestLabels[item];
+        }).join(", ") + '</strong></div>' +
+        '<div class="review-item"><span>สไตล์</span><strong>' +
+        escapeHTML(paceLabels[plan.pace]) + '</strong></div>';
+    }
+
+    /* =========================
+       4. SMART TRIP LOGIC
+    ========================= */
+
+    function getDistance(originKey, destinationKey) {
+      if (originKey === destinationKey) return 35;
+
+      var a = cities[originKey];
+      var b = cities[destinationKey];
+
+      var earthRadius = 6371;
+      var lat1 = a.lat * Math.PI / 180;
+      var lat2 = b.lat * Math.PI / 180;
+      var deltaLat = (b.lat - a.lat) * Math.PI / 180;
+      var deltaLng = (b.lng - a.lng) * Math.PI / 180;
+
+      var haversine =
+        Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
+        Math.cos(lat1) * Math.cos(lat2) *
+        Math.sin(deltaLng / 2) * Math.sin(deltaLng / 2);
+
+      var centralAngle = 2 * Math.atan2(
+        Math.sqrt(haversine),
+        Math.sqrt(1 - haversine)
+      );
+
+      return Math.max(35, Math.round(earthRadius * centralAngle * 1.15));
+    }
+
+    function buildTransportOptions(plan) {
+      var distance = getDistance(plan.origin, plan.destination);
+      var people = Math.max(1, plan.people);
+
+      var options = [
+        {
+          mode: "car",
+          label: "รถยนต์",
+          icon: "🚗",
+          hours: Math.max(1, distance / 68 + 0.6),
+          pricePerPerson: Math.max(180, distance * 3.4 * 2 / people),
+          description: "ยืดหยุ่น"
+        },
+        {
+          mode: "bus",
+          label: "รถบัส",
+          icon: "🚌",
+          hours: Math.max(1.5, distance / 58 + 1),
+          pricePerPerson: Math.max(220, distance * 1.6),
+          description: "ประหยัด"
+        },
+        {
+          mode: "train",
+          label: "รถไฟ",
+          icon: "🚆",
+          hours: Math.max(2, distance / 52 + 1),
+          pricePerPerson: Math.max(180, distance * 1.45),
+          description: "เดินทางสบาย"
+        },
+        {
+          mode: "plane",
+          label: "เครื่องบิน",
+          icon: "✈️",
+          hours: Math.max(2.5, distance / 700 + 2.2),
+          pricePerPerson: Math.max(1200, distance * 3.5),
+          description: "รวดเร็ว"
+        }
+      ];
+
+      return options.map(function (item) {
+        item.hours = Math.round(item.hours * 10) / 10;
+        item.pricePerPerson =
+          Math.round(item.pricePerPerson / 10) * 10;
+        item.total =
+          Math.round(item.pricePerPerson * people / 10) * 10;
+        return item;
+      });
+    }
+
+    function chooseTransport(plan, options) {
+      if (plan.transport !== "best") {
+        var selected = options.find(function (item) {
+          return item.mode === plan.transport;
+        });
+        return selected ? selected.mode : "bus";
+      }
+
+      var budgetPerPerson =
+        plan.budget / Math.max(1, plan.people);
+
+      var priceWeight = budgetPerPerson < 7000 ? 0.78 : 0.5;
+      var maxPrice = Math.max.apply(null, options.map(function (item) {
+        return item.pricePerPerson;
+      }));
+      var maxTime = Math.max.apply(null, options.map(function (item) {
+        return item.hours;
+      }));
+
+      var ranked = options.map(function (item) {
+        return {
+          mode: item.mode,
+          score:
+            (item.pricePerPerson / maxPrice) * priceWeight +
+            (item.hours / maxTime) * (1 - priceWeight)
+        };
+      }).sort(function (a, b) {
+        return a.score - b.score;
+      });
+
+      return ranked[0].mode;
+    }
+
+    function scorePlace(place, plan) {
+      var score = 10;
+      var dailyBudget =
+        plan.budget / Math.max(1, plan.people) /
+        Math.max(1, plan.days);
+
+      if (plan.interests.indexOf(place.category) >= 0) {
+        score += 50;
+      }
+
+      if (place.cost === 0) {
+        score += 14;
+      } else if (place.cost <= dailyBudget * 0.15) {
+        score += 12;
+      } else if (place.cost > dailyBudget * 0.35) {
+        score -= 18;
+      }
+
+      if (plan.pace === "relaxed" && place.duration <= 120) {
+        score += 9;
+      }
+
+      if (plan.pace === "balanced" && place.duration <= 150) {
+        score += 7;
+      }
+
+      if (plan.pace === "packed" && place.duration <= 100) {
+        score += 9;
+      }
+
+      score -= Math.min(10, place.distanceScore * 0.45);
+
+      return Math.round(score);
+    }
+
+    function getPlaceReason(place, plan) {
+      var reasons = [];
+      var dailyBudget =
+        plan.budget / Math.max(1, plan.people) /
+        Math.max(1, plan.days);
+
+      if (plan.interests.indexOf(place.category) >= 0) {
+        reasons.push("ตรงกับความสนใจด้าน" +
+          interestLabels[place.category]);
+      }
+
+      if (place.cost === 0) {
+        reasons.push("เข้าชมฟรี ช่วยประหยัดงบ");
+      } else if (place.cost <= dailyBudget * 0.15) {
+        reasons.push("ค่าใช้จ่ายเหมาะกับงบ");
+      }
+
+      if (plan.pace === "relaxed" && place.duration <= 120) {
+        reasons.push("เหมาะกับทริปสบาย ๆ");
+      }
+
+      if (reasons.length === 0) {
+        reasons.push("เป็นสถานที่เด่นในข้อมูลตัวอย่าง");
+      }
+
+      return reasons.slice(0, 2).join(" • ");
+    }
+
+    function createMeal(name, anchor, emoji, duration) {
+      return {
+        id: createId(),
+        name: name,
+        emoji: emoji,
+        kind: "meal",
+        category: "food",
+        cost: 0,
+        duration: duration,
+        buffer: 0,
+        anchor: anchor,
+        manualTime: ""
+      };
+    }
+
+    function reflowDay(day) {
+      var currentMinutes = 8 * 60;
+
+      day.activities.forEach(function (activity) {
+        var start = currentMinutes;
+        var manualMinutes = timeToMinutes(activity.manualTime);
+
+        if (manualMinutes !== null) {
+          start = manualMinutes;
+        } else if (activity.kind === "meal" && activity.anchor) {
+          start = Math.max(currentMinutes, activity.anchor);
+        }
+
+        activity.time = minutesToTime(start);
+        currentMinutes = start + Number(activity.duration || 60);
+
+        if (activity.kind !== "meal") {
+          currentMinutes += Number(activity.buffer || 20);
+        }
+      });
+    }
+
+    function buildDay(date, number, places) {
+      var midpoint = Math.ceil(places.length / 2);
+      var morning = places.slice(0, midpoint);
+      var afternoon = places.slice(midpoint);
+      var activities = [];
+
+      activities.push(createMeal("อาหารเช้า", 480, "🥐", 60));
+
+      morning.forEach(function (place) {
+        var activity = cloneData(place);
+        activity.kind = "place";
+        activity.buffer = 20;
+        activity.manualTime = "";
+        activities.push(activity);
+      });
+
+      activities.push(createMeal("อาหารกลางวัน", 720, "🍱", 60));
+
+      afternoon.forEach(function (place) {
+        var activity = cloneData(place);
+        activity.kind = "place";
+        activity.buffer = 20;
+        activity.manualTime = "";
+        activities.push(activity);
+      });
+
+      activities.push(createMeal("อาหารเย็น", 1080, "🍽️", 75));
+
+      var day = {
+        dayNumber: number,
+        date: toISODate(date),
+        activities: activities
+      };
+
+      reflowDay(day);
+      return day;
+    }
+
+    function generateTrip(plan) {
+      var destination = cities[plan.destination];
+      var perDay =
+        plan.pace === "relaxed" ? 2 :
+        plan.pace === "packed" ? 4 : 3;
+
+      var needed = plan.days * perDay;
+
+      var ranked = destination.places.map(function (place) {
+        var result = cloneData(place);
+        result.score = scorePlace(place, plan);
+        result.reason = getPlaceReason(place, plan);
+        return result;
+      }).sort(function (a, b) {
+        return b.score - a.score;
+      });
+
+      var selected = ranked.slice(0, needed);
+
+      while (selected.length < needed) {
+        var number = selected.length + 1;
+        selected.push({
+          id: createId(),
+          name: "เวลาสำรวจอิสระ " + number,
+          emoji: "🚶",
+          category: "nature",
+          cost: 0,
+          duration: 75,
+          x: 350 + ((number % 3) - 1) * 38,
+          y: 180 + ((number % 4) - 2) * 28,
+          score: 5,
+          distanceScore: 1,
+          reason: "กิจกรรมยืดหยุ่นจากข้อมูลตัวอย่าง"
+        });
+      }
+
+      var itinerary = [];
+
+      for (var index = 0; index < plan.days; index++) {
+        var dayPlaces = selected.slice(
+          index * perDay,
+          (index + 1) * perDay
+        );
+
+        itinerary.push(
+          buildDay(
+            addDays(plan.startDate, index),
+            index + 1,
+            dayPlaces
+          )
+        );
+      }
+
+      var transports = buildTransportOptions(plan);
+      var transportMode = chooseTransport(plan, transports);
+
+      return {
+        id: null,
+        title: plan.tripName,
+        plan: cloneData(plan),
+        recommendations: ranked,
+        itinerary: itinerary,
+        transports: transports,
+        transportMode: transportMode,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        version: 2
+      };
+    }
+
+    function calculateBudget(trip) {
+      var plan = trip.plan;
+      var selectedTransport = trip.transports.find(function (item) {
+        return item.mode === trip.transportMode;
+      });
+
+      var rooms = Math.ceil(plan.people / 2);
+      var nights = Math.max(0, plan.days - 1);
+
+      var transport = selectedTransport ?
+        selectedTransport.total : 0;
+
+      var accommodation =
+        accommodationData[plan.accommodation].rate *
+        rooms * nights;
+
+      var food =
+        foodData[plan.foodStyle].daily *
+        plan.people * plan.days;
+
+      var attractions = 0;
+
+      trip.itinerary.forEach(function (day) {
+        day.activities.forEach(function (activity) {
+          if (activity.kind !== "meal") {
+            attractions +=
+              (Number(activity.cost) || 0) * plan.people;
+          }
+        });
+      });
+
+      var subtotal =
+        transport + accommodation + food + attractions;
+
+      var other = Math.round(subtotal * 0.05);
+      var total = subtotal + other;
+
+      return {
+        transport: transport,
+        accommodation: accommodation,
+        food: food,
+        attractions: attractions,
+        other: other,
+        total: total,
+        perPerson: total / Math.max(1, plan.people),
+        remaining: plan.budget - total,
+        percent: plan.budget > 0 ?
+          total / plan.budget * 100 : 100
+      };
+    }
+
+    /* =========================
+       5. RESULT RENDERING
+    ========================= */
+
+    function renderResult() {
+      var container = $("#result-content");
+
+      if (!currentTrip) {
+        container.innerHTML =
+          '<div class="empty-state">' +
+          '<span class="empty-icon">🧳</span>' +
+          '<h2>ยังไม่มีแผนทริป</h2>' +
+          '<button class="button primary" type="button" data-page="plan">' +
+          'เริ่มวางแผน</button></div>';
+        return;
+      }
+
+      var trip = currentTrip;
+      var plan = trip.plan;
+      var origin = cities[plan.origin];
+      var destination = cities[plan.destination];
+      var budget = calculateBudget(trip);
+      var endDate = addDays(plan.startDate, plan.days - 1);
+
+      container.innerHTML =
+        '<section class="result-hero">' +
+          '<div class="result-title-row">' +
+            '<div>' +
+              '<span class="badge">✨ Smart Trip Plan</span>' +
+              '<h1>' + escapeHTML(trip.title) + '</h1>' +
+              '<p class="muted">' +
+                escapeHTML(origin.name) + " → " +
+                escapeHTML(destination.name) + " • " +
+                formatDate(parseDate(plan.startDate)) + " – " +
+                formatDate(endDate) +
+              '</p>' +
+            '</div>' +
+            '<div class="button-row no-print">' +
+              '<button class="button secondary" type="button" data-action="save">💾 บันทึก</button>' +
+              '<button class="button secondary" type="button" data-action="share">↗ แชร์</button>' +
+              '<button class="button secondary" type="button" data-action="print">🖨 พิมพ์</button>' +
+            '</div>' +
+          '</div>' +
+          '<div class="summary-strip">' +
+            '<span class="summary-chip">📅 ' + plan.days + ' วัน</span>' +
+            '<span class="summary-chip">👥 ' + plan.people + ' คน</span>' +
+            '<span class="summary-chip">🎒 ' + escapeHTML(paceLabels[plan.pace]) + '</span>' +
+            '<span class="summary-chip">💰 งบ ' + formatMoney(plan.budget) + '</span>' +
+            '<span class="summary-chip">' + destination.emoji + " " + escapeHTML(destination.name) + '</span>' +
+          '</div>' +
+        '</section>' +
+
+        '<section class="result-section">' +
+          '<div class="section-title-row">' +
+            '<div><h2>⚙️ Smart Optimization</h2>' +
+            '<p class="muted">ปุ่มเหล่านี้จะปรับแผนและคำนวณข้อมูลใหม่จริง</p></div>' +
+            '<span class="demo-label">Rule-Based</span>' +
+          '</div>' +
+          '<div class="optimizer-grid no-print">' +
+            '<button class="button ghost" type="button" data-action="optimize-cheap">💰 ประหยัดเงิน</button>' +
+            '<button class="button ghost" type="button" data-action="optimize-time">⏱️ ประหยัดเวลา</button>' +
+            '<button class="button ghost" type="button" data-action="optimize-more">➕ เพิ่มสถานที่</button>' +
+            '<button class="button ghost" type="button" data-action="optimize-balance">⚖️ จัดสมดุลใหม่</button>' +
+          '</div>' +
+        '</section>' +
+
+        '<section class="result-section">' +
+          '<div class="section-title-row">' +
+            '<div><h2>🧠 Smart Recommendation</h2>' +
+            '<p class="muted">เรียงจากคะแนนความสนใจ งบ ระยะทาง และสไตล์ทริป</p></div>' +
+            '<span class="demo-label">Estimated/Demo Data</span>' +
+          '</div>' +
+          '<div class="smart-box">' +
+            '<strong>เหตุผลที่ระบบสร้างแผนนี้</strong>' +
+            'เลือกกิจกรรมที่ตรงกับ ' +
+            plan.interests.map(function (item) {
+              return interestLabels[item];
+            }).join(", ") +
+            ' และจัดในรูปแบบ “' +
+            paceLabels[plan.pace] + '”' +
+          '</div>' +
+          '<div class="recommendation-grid">' +
+            renderRecommendations(trip) +
+          '</div>' +
+        '</section>' +
+
+        '<section class="result-section">' +
+          '<div class="section-title-row">' +
+            '<div><h2>🗓️ Itinerary</h2>' +
+            '<p class="muted">ตารางรวม Buffer 20 นาที สามารถเพิ่ม ลบ และแก้ไขได้</p></div>' +
+            '<span class="demo-label">เวลาโดยประมาณ</span>' +
+          '</div>' +
+          '<div>' + renderItinerary(trip) + '</div>' +
+        '</section>' +
+
+        '<section class="result-section">' +
+          '<div class="section-title-row">' +
+            '<div><h2>💰 Budget Calculation</h2>' +
+            '<p class="muted">คำนวณใหม่เมื่อเปลี่ยนกิจกรรมหรือการเดินทาง</p></div>' +
+            '<span class="demo-label">ราคาโดยประมาณ</span>' +
+          '</div>' +
+          renderBudget(budget) +
+        '</section>' +
+
+        '<section class="result-section">' +
+          '<div class="section-title-row">' +
+            '<div><h2>🚆 Transport Comparison</h2>' +
+            '<p class="muted">เปรียบเทียบจากระยะทาง ราคา และเวลาโดยประมาณ</p></div>' +
+            '<span class="demo-label">ไม่ใช่ราคาจริง</span>' +
+          '</div>' +
+          '<div class="transport-grid">' +
+            renderTransport(trip) +
+          '</div>' +
+        '</section>' +
+
+        '<section class="result-section">' +
+          '<div class="section-title-row">' +
+            '<div><h2>🏨 ข้อมูลประกอบทริป</h2>' +
+            '<p class="muted">ตัวอย่างที่พักและอาหารประจำปลายทาง</p></div>' +
+          '</div>' +
+          '<div class="local-box">' +
+            '<div class="card"><h3>ที่พักตัวอย่าง</h3><p class="muted">' +
+              destination.hotels.map(escapeHTML).join(" • ") +
+            '</p></div>' +
+            '<div class="card"><h3>อาหารแนะนำ</h3><p class="muted">' +
+              destination.foods.map(escapeHTML).join(" • ") +
+            '</p></div>' +
+          '</div>' +
+        '</section>' +
+
+        '<section class="result-section">' +
+          '<div class="section-title-row">' +
+            '<div><h2>🗺️ Map Mockup</h2>' +
+            '<p class="muted">แสดงลำดับจุดแวะ ไม่ใช่ระบบนำทางจริง</p></div>' +
+            '<a class="button ghost no-print" target="_blank" rel="noopener noreferrer" href="' +
+            'https://www.google.com/maps/search/?api=1&query=' +
+            encodeURIComponent(destination.query) +
+            '">เปิด Google Maps ↗</a>' +
+          '</div>' +
+          renderMap(trip) +
+        '</section>';
+    }
+
+    function isPlaceAdded(trip, placeId) {
+      return trip.itinerary.some(function (day) {
+        return day.activities.some(function (activity) {
+          return activity.id === placeId;
+        });
+      });
+    }
+
+    function renderRecommendations(trip) {
+      return trip.recommendations.slice(0, 6).map(function (place) {
+        var added = isPlaceAdded(trip, place.id);
+
+        return '<article class="place-card">' +
+          '<div class="place-emoji">' + place.emoji + '</div>' +
+          '<strong>' + escapeHTML(place.name) + '</strong>' +
+          '<div class="place-meta">' +
+            '<span class="badge neutral">คะแนน ' + place.score + '</span>' +
+            '<span class="badge neutral">' + formatMoney(place.cost) + '/คน</span>' +
+            '<span class="badge neutral">' + place.duration + ' นาที</span>' +
+          '</div>' +
+          '<p>' + escapeHTML(place.reason) + '</p>' +
+          '<button class="button small ' +
+            (added ? "secondary" : "ghost") +
+            ' no-print" type="button" data-action="add-place" data-place-id="' +
+            escapeHTML(place.id) + '"' +
+            (added ? " disabled" : "") + '>' +
+            (added ? "✓ อยู่ในแผนแล้ว" : "+ เพิ่มในแผน") +
+          '</button>' +
+        '</article>';
+      }).join("");
+    }
+
+    function renderItinerary(trip) {
+      return trip.itinerary.map(function (day, dayIndex) {
+        return '<article class="day-card">' +
+          '<div class="day-header">' +
+            '<div><h3>วันที่ ' + day.dayNumber + '</h3>' +
+            '<span class="muted">' +
+              formatDate(parseDate(day.date)) +
+            '</span></div>' +
+            '<button class="button ghost small no-print" type="button" ' +
+            'data-action="add-activity" data-day="' + dayIndex + '">' +
+            '+ เพิ่มกิจกรรม</button>' +
+          '</div>' +
+          '<div class="timeline">' +
+            day.activities.map(function (activity, activityIndex) {
+              return '<div class="timeline-item">' +
+                '<div class="timeline-time">' +
+                  escapeHTML(activity.time) +
+                '</div>' +
+                '<div class="timeline-dot"></div>' +
+                '<div class="timeline-content">' +
+                  '<strong>' + (activity.emoji || "📍") + " " +
+                    escapeHTML(activity.name) + '</strong>' +
+                  '<small>' +
+                    activity.duration + ' นาที' +
+                    (activity.kind !== "meal" ?
+                      ' • Buffer ' + (activity.buffer || 20) +
+                      ' นาที • ' + formatMoney(activity.cost) + '/คน' :
+                      ' • รวมในงบอาหาร') +
+                    (activity.note ?
+                      ' • ' + escapeHTML(activity.note) : '') +
+                  '</small>' +
+                  (activity.reason ?
+                    '<div class="muted" style="font-size:.77rem;margin-top:3px">' +
+                    escapeHTML(activity.reason) + '</div>' : '') +
+                '</div>' +
+                (activity.kind !== "meal" ?
+                  '<div class="timeline-actions no-print">' +
+                    '<button class="icon-button" type="button" aria-label="แก้ไข" ' +
+                    'data-action="edit-activity" data-day="' + dayIndex +
+                    '" data-activity="' + activityIndex + '">✎</button>' +
+                    '<button class="icon-button danger" type="button" aria-label="ลบ" ' +
+                    'data-action="remove-activity" data-day="' + dayIndex +
+                    '" data-activity="' + activityIndex + '">🗑</button>' +
+                  '</div>' : '') +
+              '</div>';
+            }).join("") +
+          '</div>' +
+        '</article>';
+      }).join("");
+    }
+
+    function renderBudget(budget) {
+      var statusText = budget.remaining >= 0 ?
+        "เหลืองบ " + formatMoney(budget.remaining) :
+        "เกินงบ " + formatMoney(Math.abs(budget.remaining));
+
+      var statusClass =
+        budget.remaining >= 0 ? "success" : "warning";
+
+      var progress =
+        Math.min(100, Math.max(0, budget.percent));
+
+      return '<div class="budget-layout">' +
+        '<div><div class="budget-chart">' +
+          '<div class="budget-chart-inner"><div>' +
+            '<strong>' + formatMoney(budget.total) + '</strong>' +
+            '<small class="muted">รวมโดยประมาณ</small>' +
+          '</div></div>' +
+        '</div></div>' +
+        '<div>' +
+          '<div class="budget-list">' +
+            '<div class="budget-row"><span>🚆 การเดินทาง</span><strong>' +
+              formatMoney(budget.transport) + '</strong></div>' +
+            '<div class="budget-row"><span>🏨 ที่พัก</span><strong>' +
+              formatMoney(budget.accommodation) + '</strong></div>' +
+            '<div class="budget-row"><span>🍜 อาหาร</span><strong>' +
+              formatMoney(budget.food) + '</strong></div>' +
+            '<div class="budget-row"><span>🎟️ กิจกรรม</span><strong>' +
+              formatMoney(budget.attractions) + '</strong></div>' +
+            '<div class="budget-row"><span>🧾 ค่าใช้จ่ายอื่น 5%</span><strong>' +
+              formatMoney(budget.other) + '</strong></div>' +
+            '<div class="budget-row total"><span>ยอดรวม</span><span>' +
+              formatMoney(budget.total) + '</span></div>' +
+            '<div class="budget-row"><span>เฉลี่ยต่อคน</span><strong>' +
+              formatMoney(budget.perPerson) + '</strong></div>' +
+          '</div>' +
+          '<div style="margin-top:12px">' +
+            '<span class="badge ' + statusClass + '">' +
+              statusText + '</span>' +
+            '<div class="budget-progress">' +
+              '<div class="budget-progress-fill ' +
+                (budget.remaining < 0 ? "over" : "") +
+                '" style="width:' + progress + '%"></div>' +
+            '</div>' +
+            '<small class="muted">ใช้ไป ' +
+              Math.round(budget.percent) + '% ของงบ</small>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }
+
+    function renderTransport(trip) {
+      return trip.transports.map(function (item) {
+        var selected = item.mode === trip.transportMode;
+
+        return '<article class="transport-card ' +
+          (selected ? "selected" : "") + '">' +
+          '<div class="transport-icon">' + item.icon + '</div>' +
+          '<h3>' + escapeHTML(item.label) + '</h3>' +
+          '<dl>' +
+            '<div><dt>เวลาเที่ยวเดียว</dt><dd>' +
+              item.hours + ' ชม.</dd></div>' +
+            '<div><dt>ต่อคน/ไป-กลับ</dt><dd>' +
+              formatMoney(item.pricePerPerson) + '</dd></div>' +
+            '<div><dt>รวม ' + trip.plan.people + ' คน</dt><dd>' +
+              formatMoney(item.total) + '</dd></div>' +
+          '</dl>' +
+          '<button class="button small ' +
+            (selected ? "primary" : "secondary") +
+            ' no-print" type="button" data-action="select-transport" ' +
+            'data-mode="' + item.mode + '">' +
+            (selected ? "✓ เลือกแล้ว" : "เลือกวิธีนี้") +
+          '</button>' +
+        '</article>';
+      }).join("");
+    }
+
+    function renderMap(trip) {
+      var points = [];
+
+      trip.itinerary.forEach(function (day) {
+        day.activities.forEach(function (activity) {
+          if (
+            activity.kind !== "meal" &&
+            Number.isFinite(Number(activity.x)) &&
+            Number.isFinite(Number(activity.y)) &&
+            !points.some(function (point) {
+              return point.id === activity.id;
+            })
+          ) {
+            points.push(activity);
+          }
+        });
+      });
+
+      var visiblePoints = points.slice(0, 12);
+      var linePoints = visiblePoints.map(function (point) {
+        return point.x + "," + point.y;
+      }).join(" ");
+
+      return '<div class="map-shell">' +
+        '<svg viewBox="0 0 700 360" role="img" aria-label="แผนที่จำลอง">' +
+          '<rect width="700" height="360" fill="#e0f2fe"></rect>' +
+          '<path d="M0 80 C140 30 180 130 320 80 S540 40 700 100 V0 H0 Z" fill="#dcfce7"></path>' +
+          '<path d="M0 280 C120 230 220 330 355 275 S570 230 700 285 V360 H0 Z" fill="#d1fae5"></path>' +
+          '<path d="M40 180 C150 130 255 230 370 170 S560 125 670 185" fill="none" stroke="#fff" stroke-width="24" opacity=".85"></path>' +
+          '<path d="M100 30 C160 90 190 160 150 330" fill="none" stroke="#bfdbfe" stroke-width="7"></path>' +
+          '<path d="M540 10 C480 100 525 220 600 350" fill="none" stroke="#bfdbfe" stroke-width="7"></path>' +
+          (linePoints ?
+            '<polyline points="' + linePoints +
+            '" fill="none" stroke="#2563eb" stroke-width="5" ' +
+            'stroke-dasharray="10 8" stroke-linecap="round"></polyline>' :
+            '') +
+          visiblePoints.map(function (point, index) {
+            return '<g>' +
+              '<circle cx="' + point.x + '" cy="' + point.y +
+              '" r="17" fill="#fff"></circle>' +
+              '<circle cx="' + point.x + '" cy="' + point.y +
+              '" r="12" fill="#2563eb"></circle>' +
+              '<text x="' + point.x + '" y="' + (Number(point.y) + 4) +
+              '" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">' +
+              (index + 1) + '</text></g>';
+          }).join("") +
+          '<text x="20" y="338" fill="#475569" font-size="13">' +
+            'Map Mockup • ไม่ใช่มาตราส่วนจริง</text>' +
+        '</svg>' +
+        '<div class="map-legend">' +
+          visiblePoints.map(function (point, index) {
+            return '<span><i class="legend-dot"></i>' +
+              (index + 1) + '. ' + escapeHTML(point.name) + '</span>';
+          }).join("") +
+        '</div>' +
+      '</div>';
+    }
+
+    /* =========================
+       6. GENERATE BUTTON FIX
+    ========================= */
+
+    function handleGenerateTrip() {
+      if (isGenerating) return;
+
+      var button = $("#generate-trip-button");
+      var plan;
+
+      try {
+        plan = collectPlan();
+
+        if (!validateAll(plan)) {
+          return;
+        }
+
+        isGenerating = true;
+        button.disabled = true;
+        button.textContent = "กำลังสร้างแผน...";
+        showLoading("กำลังวิเคราะห์ความสนใจ งบ และจัดตาราง...");
+
+        window.setTimeout(function () {
+          try {
+            currentTrip = generateTrip(plan);
+
+            if (
+              !currentTrip ||
+              !currentTrip.itinerary ||
+              currentTrip.itinerary.length === 0
+            ) {
+              throw new Error("ไม่สามารถสร้าง Itinerary ได้");
+            }
+
+            renderResult();
+            showPage("result");
+            showToast("สร้าง Smart Trip Plan เรียบร้อยแล้ว");
+          } catch (error) {
+            console.error("Generate Trip Error:", error);
+            showToast(
+              "เกิดข้อผิดพลาดระหว่างสร้างทริป กรุณาลองใหม่",
+              "error"
+            );
+          } finally {
+            isGenerating = false;
+            button.disabled = false;
+            button.textContent = "✨ สร้าง Smart Trip Plan";
+            hideLoading();
+          }
+        }, 650);
+      } catch (error) {
+        console.error("Generate Button Error:", error);
+        isGenerating = false;
+        button.disabled = false;
+        button.textContent = "✨ สร้าง Smart Trip Plan";
+        hideLoading();
+        showToast("ไม่สามารถอ่านข้อมูลจากแบบฟอร์มได้", "error");
+      }
+    }
+
+    /* =========================
+       7. CUSTOMIZE ACTIVITIES
+    ========================= */
+
+    function openModal(config) {
+      $("#modal-title").textContent = config.title;
+      $("#modal-body").innerHTML = config.html;
+      $("#modal-save").textContent = config.saveText || "บันทึก";
+      modalSaveHandler = config.onSave;
+      $("#modal-backdrop").classList.remove("hidden");
+
+      var firstInput = $("#modal-body input");
+      if (firstInput) {
+        window.setTimeout(function () {
+          firstInput.focus();
+        }, 50);
+      }
+    }
+
+    function closeModal() {
+      $("#modal-backdrop").classList.add("hidden");
+      $("#modal-body").innerHTML = "";
+      modalSaveHandler = null;
+    }
+
+    function openActivityModal(dayIndex, activityIndex, preset) {
+      if (!currentTrip) return;
+
+      var editing =
+        activityIndex !== null &&
+        activityIndex !== undefined;
+
+      var activity = editing ?
+        currentTrip.itinerary[dayIndex].activities[activityIndex] :
+        (preset || {
+          name: "",
+          emoji: "📍",
+          duration: 90,
+          cost: 0,
+          note: "",
+          manualTime: ""
+        });
+
+      var dayOptions = currentTrip.itinerary.map(function (day, index) {
+        return '<option value="' + index + '"' +
+          (index === dayIndex ? " selected" : "") + '>' +
+          'วันที่ ' + day.dayNumber + " — " +
+          formatDate(parseDate(day.date)) +
+          '</option>';
+      }).join("");
+
+      openModal({
+        title: editing ? "แก้ไขกิจกรรม" : "เพิ่มกิจกรรม",
+        saveText: editing ? "บันทึกการแก้ไข" : "เพิ่มกิจกรรม",
+        html:
+          '<div class="form-grid" style="margin-top:0">' +
+            '<div class="field full">' +
+              '<label for="activity-name">ชื่อกิจกรรม</label>' +
+              '<input id="activity-name" maxlength="80" value="' +
+              escapeHTML(activity.name) + '">' +
+            '</div>' +
+            '<div class="field">' +
+              '<label for="activity-day">วันที่</label>' +
+              '<select id="activity-day"' +
+              (editing ? " disabled" : "") + '>' +
+              dayOptions + '</select>' +
+            '</div>' +
+            '<div class="field">' +
+              '<label for="activity-time">เวลาเริ่ม</label>' +
+              '<input id="activity-time" type="time" value="' +
+              escapeHTML(activity.manualTime || activity.time || "") + '">' +
+            '</div>' +
+            '<div class="field">' +
+              '<label for="activity-duration">ระยะเวลา (นาที)</label>' +
+              '<input id="activity-duration" type="number" min="15" max="720" step="15" value="' +
+              (Number(activity.duration) || 90) + '">' +
+            '</div>' +
+            '<div class="field">' +
+              '<label for="activity-cost">ค่าใช้จ่ายต่อคน</label>' +
+              '<input id="activity-cost" type="number" min="0" step="10" value="' +
+              (Number(activity.cost) || 0) + '">' +
+            '</div>' +
+            '<div class="field full">' +
+              '<label for="activity-note">หมายเหตุ</label>' +
+              '<textarea id="activity-note" maxlength="200">' +
+              escapeHTML(activity.note || "") + '</textarea>' +
+            '</div>' +
+          '</div>',
+        onSave: function () {
+          var name = $("#activity-name").value.trim();
+          var selectedDay = Number($("#activity-day").value);
+          var duration = Number($("#activity-duration").value);
+          var cost = Number($("#activity-cost").value);
+          var manualTime = $("#activity-time").value;
+          var note = $("#activity-note").value.trim();
+
+          if (!name) {
+            showToast("กรุณาระบุชื่อกิจกรรม", "error");
+            return;
+          }
+
+          if (!duration || duration < 15) {
+            showToast("ระยะเวลาต้องไม่น้อยกว่า 15 นาที", "error");
+            return;
+          }
+
+          if (editing) {
+            var target =
+              currentTrip.itinerary[dayIndex].activities[activityIndex];
+
+            target.name = name;
+            target.duration = duration;
+            target.cost = Math.max(0, cost || 0);
+            target.manualTime = manualTime;
+            target.note = note;
+
+            reflowDay(currentTrip.itinerary[dayIndex]);
+          } else {
+            var destination =
+              cities[currentTrip.plan.destination];
+
+            var newActivity = {
+              id: preset && preset.id ? preset.id : createId(),
+              name: name,
+              emoji: preset && preset.emoji ? preset.emoji : "📍",
+              category: preset && preset.category ?
+                preset.category : "culture",
+              cost: Math.max(0, cost || 0),
+              duration: duration,
+              buffer: 20,
+              kind: "place",
+              manualTime: manualTime,
+              note: note,
+              reason: preset && preset.reason ?
+                preset.reason : "กิจกรรมที่ผู้ใช้เพิ่มเอง",
+              x: preset && Number.isFinite(Number(preset.x)) ?
+                preset.x : 350,
+              y: preset && Number.isFinite(Number(preset.y)) ?
+                preset.y : 180
+            };
+
+            var day = currentTrip.itinerary[selectedDay];
+            var dinnerIndex = day.activities.findIndex(function (item) {
+              return item.kind === "meal" && item.anchor === 1080;
+            });
+
+            if (dinnerIndex >= 0) {
+              day.activities.splice(dinnerIndex, 0, newActivity);
+            } else {
+              day.activities.push(newActivity);
+            }
+
+            reflowDay(day);
+          }
+
+          currentTrip.updatedAt = new Date().toISOString();
+          closeModal();
+          renderResult();
+          showToast(editing ?
+            "แก้ไขกิจกรรมแล้ว" :
+            "เพิ่มกิจกรรมแล้ว");
+        }
+      });
+    }
+
+    function removeActivity(dayIndex, activityIndex) {
+      var day = currentTrip.itinerary[dayIndex];
+      var activity = day.activities[activityIndex];
+
+      if (!activity) return;
+
+      if (!window.confirm(
+        'ต้องการลบ “' + activity.name + '” หรือไม่?'
+      )) {
+        return;
+      }
+
+      day.activities.splice(activityIndex, 1);
+      reflowDay(day);
+      currentTrip.updatedAt = new Date().toISOString();
+      renderResult();
+      showToast("ลบกิจกรรมแล้ว");
+    }
+
+    /* =========================
+       8. OPTIMIZATION
+    ========================= */
+
+    function optimizeCheap() {
+      if (!currentTrip) return;
+
+      currentTrip.plan.accommodation = "economy";
+
+      var cheapest = currentTrip.transports.slice().sort(function (a, b) {
+        return a.total - b.total;
+      })[0];
+
+      currentTrip.transportMode = cheapest.mode;
+
+      currentTrip.itinerary.forEach(function (day) {
+        day.activities.forEach(function (activity) {
+          if (activity.kind !== "meal" && activity.cost > 250) {
+            activity.cost = Math.round(activity.cost * 0.65);
+            activity.note = "ปรับเป็นตัวเลือกประหยัด";
+          }
+        });
+      });
+
+      currentTrip.updatedAt = new Date().toISOString();
+      renderResult();
+      showToast("ปรับแผนเพื่อประหยัดเงินแล้ว");
+    }
+
+    function optimizeTime() {
+      if (!currentTrip) return;
+
+      var fastest = currentTrip.transports.slice().sort(function (a, b) {
+        return a.hours - b.hours;
+      })[0];
+
+      currentTrip.transportMode = fastest.mode;
+
+      currentTrip.itinerary.forEach(function (day) {
+        var meals = day.activities.filter(function (item) {
+          return item.kind === "meal";
+        });
+
+        var places = day.activities.filter(function (item) {
+          return item.kind !== "meal";
+        }).sort(function (a, b) {
+          return Number(a.x || 0) - Number(b.x || 0);
+        });
+
+        var breakfast = meals.find(function (item) {
+          return item.anchor === 480;
+        });
+
+        var lunch = meals.find(function (item) {
+          return item.anchor === 720;
+        });
+
+        var dinner = meals.find(function (item) {
+          return item.anchor === 1080;
+        });
+
+        var midpoint = Math.ceil(places.length / 2);
+        day.activities = [];
+
+        if (breakfast) day.activities.push(breakfast);
+
+        places.slice(0, midpoint).forEach(function (item) {
+          item.buffer = 10;
+          day.activities.push(item);
+        });
+
+        if (lunch) day.activities.push(lunch);
+
+        places.slice(midpoint).forEach(function (item) {
+          item.buffer = 10;
+          day.activities.push(item);
+        });
+
+        if (dinner) day.activities.push(dinner);
+        reflowDay(day);
+      });
+
+      currentTrip.updatedAt = new Date().toISOString();
+      renderResult();
+      showToast("จัดเส้นทางและลด Buffer เพื่อประหยัดเวลาแล้ว");
+    }
+
+    function optimizeMorePlaces() {
+      if (!currentTrip) return;
+
+      var available = currentTrip.recommendations.find(function (place) {
+        return !isPlaceAdded(currentTrip, place.id);
+      });
+
+      if (!available) {
+        showToast("เพิ่มสถานที่ตัวอย่างครบแล้ว");
+        return;
+      }
+
+      var targetDayIndex = 0;
+      var minimumCount = Infinity;
+
+      currentTrip.itinerary.forEach(function (day, index) {
+        var count = day.activities.filter(function (item) {
+          return item.kind !== "meal";
+        }).length;
+
+        if (count < minimumCount) {
+          minimumCount = count;
+          targetDayIndex = index;
+        }
+      });
+
+      var day = currentTrip.itinerary[targetDayIndex];
+      var activity = cloneData(available);
+      activity.kind = "place";
+      activity.buffer = 20;
+      activity.manualTime = "";
+
+      var dinnerIndex = day.activities.findIndex(function (item) {
+        return item.kind === "meal" && item.anchor === 1080;
+      });
+
+      if (dinnerIndex >= 0) {
+        day.activities.splice(dinnerIndex, 0, activity);
+      } else {
+        day.activities.push(activity);
+      }
+
+      reflowDay(day);
+      currentTrip.updatedAt = new Date().toISOString();
+      renderResult();
+      showToast("เพิ่มสถานที่ในวันที่ " + (targetDayIndex + 1) + " แล้ว");
+    }
+
+    function optimizeBalance() {
+      if (!currentTrip) return;
+
+      var oldId = currentTrip.id;
+      var oldTitle = currentTrip.title;
+      var newTrip = generateTrip(currentTrip.plan);
+
+      newTrip.id = oldId;
+      newTrip.title = oldTitle;
+      currentTrip = newTrip;
+
+      renderResult();
+      showToast("จัดแผนแบบสมดุลใหม่แล้ว");
+    }
+
+    /* =========================
+       9. LOCAL STORAGE
+    ========================= */
+
+    function getSavedTrips() {
+      try {
+        var raw = localStorage.getItem(STORAGE_KEY);
+        var data = raw ? JSON.parse(raw) : [];
+        return Array.isArray(data) ? data : [];
+      } catch (error) {
+        console.error(error);
+        showToast("ไม่สามารถอ่านข้อมูลที่บันทึกไว้", "error");
+        return [];
+      }
+    }
+
+    function setSavedTrips(trips) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(trips));
+        return true;
+      } catch (error) {
+        console.error(error);
+        showToast("ไม่สามารถบันทึกข้อมูลได้", "error");
+        return false;
+      }
+    }
+
+    function saveCurrentTrip() {
+      if (!currentTrip) return;
+
+      var trips = getSavedTrips();
+
+      if (!currentTrip.id) {
+        var name = window.prompt(
+          "ตั้งชื่อทริป",
+          currentTrip.title
+        );
+
+        if (name === null) return;
+
+        currentTrip.title =
+          name.trim() || currentTrip.title;
+
+        currentTrip.id = createId();
+        trips.unshift(cloneData(currentTrip));
+      } else {
+        var index = trips.findIndex(function (trip) {
+          return trip.id === currentTrip.id;
+        });
+
+        if (index >= 0) {
+          trips[index] = cloneData(currentTrip);
+        } else {
+          trips.unshift(cloneData(currentTrip));
+        }
+      }
+
+      currentTrip.updatedAt = new Date().toISOString();
+
+      if (setSavedTrips(trips)) {
+        renderResult();
+        showToast("บันทึกทริปเรียบร้อยแล้ว");
+      }
+    }
+
+    function renderSavedTrips() {
+      var trips = getSavedTrips();
+      var container = $("#saved-content");
+
+      if (trips.length === 0) {
+        container.innerHTML =
+          '<div class="empty-state">' +
+            '<span class="empty-icon">💾</span>' +
+            '<h2>ยังไม่มีทริปที่บันทึก</h2>' +
+            '<p class="muted">สร้างทริปแล้วกดบันทึกเพื่อเก็บใน Chrome</p>' +
+            '<button class="button primary" type="button" data-page="plan">' +
+              'สร้างทริปแรก</button>' +
+          '</div>';
+        return;
+      }
+
+      container.innerHTML =
+        '<div class="saved-grid">' +
+        trips.map(function (trip) {
+          var destination = cities[trip.plan.destination];
+          var budget = calculateBudget(trip);
+
+          return '<article class="card saved-card">' +
+            '<div class="saved-details">' +
+              '<span class="badge">' +
+                destination.emoji + " " +
+                escapeHTML(destination.name) +
+              '</span>' +
+              '<h3 style="margin-top:12px">' +
+                escapeHTML(trip.title) +
+              '</h3>' +
+              '<p class="muted">' +
+                formatDate(parseDate(trip.plan.startDate)) +
+                " • " + trip.plan.days +
+                " วัน • " + trip.plan.people + " คน" +
+              '</p>' +
+              '<strong>ประมาณ ' +
+                formatMoney(budget.total) +
+              '</strong>' +
+            '</div>' +
+            '<div class="saved-actions">' +
+              '<button class="button primary small" type="button" ' +
+              'data-saved-action="load" data-id="' + trip.id + '">' +
+              'เปิดทริป</button>' +
+              '<button class="button secondary small" type="button" ' +
+              'data-saved-action="rename" data-id="' + trip.id + '">' +
+              'เปลี่ยนชื่อ</button>' +
+              '<button class="button danger small" type="button" ' +
+              'data-saved-action="delete" data-id="' + trip.id + '">' +
+              'ลบ</button>' +
+            '</div>' +
+          '</article>';
+        }).join("") +
+        '</div>';
+    }
+
+    function loadSavedTrip(id) {
+      var trip = getSavedTrips().find(function (item) {
+        return item.id === id;
+      });
+
+      if (!trip) {
+        showToast("ไม่พบทริปที่เลือก", "error");
+        return;
+      }
+
+      currentTrip = cloneData(trip);
+      renderResult();
+      showPage("result");
+      showToast("โหลดทริปเรียบร้อยแล้ว");
+    }
+
+    function renameSavedTrip(id) {
+      var trips = getSavedTrips();
+      var trip = trips.find(function (item) {
+        return item.id === id;
+      });
+
+      if (!trip) return;
+
+      var newName = window.prompt("ชื่อใหม่ของทริป", trip.title);
+      if (newName === null) return;
+
+      newName = newName.trim();
+
+      if (!newName) {
+        showToast("ชื่อทริปต้องไม่เป็นค่าว่าง", "error");
+        return;
+      }
+
+      trip.title = newName;
+      trip.updatedAt = new Date().toISOString();
+
+      if (currentTrip && currentTrip.id === id) {
+        currentTrip.title = newName;
+      }
+
+      if (setSavedTrips(trips)) {
+        renderSavedTrips();
+        showToast("เปลี่ยนชื่อทริปแล้ว");
+      }
+    }
+
+    function deleteSavedTrip(id) {
+      var trips = getSavedTrips();
+      var trip = trips.find(function (item) {
+        return item.id === id;
+      });
+
+      if (!trip) return;
+
+      if (!window.confirm(
+        'ต้องการลบทริป “' + trip.title + '” หรือไม่?'
+      )) {
+        return;
+      }
+
+      trips = trips.filter(function (item) {
+        return item.id !== id;
+      });
+
+      if (currentTrip && currentTrip.id === id) {
+        currentTrip.id = null;
+      }
+
+      if (setSavedTrips(trips)) {
+        renderSavedTrips();
+        showToast("ลบทริปแล้ว");
+      }
+    }
+
+    /* =========================
+       10. SHARE AND DEMO
+    ========================= */
+
+    function buildShareText() {
+      if (!currentTrip) return "";
+
+      var plan = currentTrip.plan;
+      var destination = cities[plan.destination];
+      var budget = calculateBudget(currentTrip);
+
+      return [
+        "Trip Plan: " + currentTrip.title,
+        "ปลายทาง: " + destination.name,
+        "วันที่: " + formatDate(parseDate(plan.startDate)),
+        "ระยะเวลา: " + plan.days + " วัน",
+        "ผู้เดินทาง: " + plan.people + " คน",
+        "ค่าใช้จ่ายประมาณ: " + formatMoney(budget.total),
+        "ข้อมูลเป็น Estimated/Demo Data ไม่ใช่ข้อมูล Real-time"
+      ].join("\n");
+    }
+
+    function fallbackCopy(text) {
+      var textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.style.position = "fixed";
+      textarea.style.opacity = "0";
+      document.body.appendChild(textarea);
+      textarea.select();
+
+      try {
+        var copied = document.execCommand("copy");
+        textarea.remove();
+
+        if (copied) {
+          showToast("คัดลอกสรุปทริปแล้ว");
+        } else {
+          window.prompt("คัดลอกข้อความนี้", text);
+        }
+      } catch (error) {
+        textarea.remove();
+        window.prompt("คัดลอกข้อความนี้", text);
+      }
+    }
+
+    function shareCurrentTrip() {
+      var text = buildShareText();
+
+      if (navigator.share) {
+        navigator.share({
+          title: currentTrip.title,
+          text: text
+        }).catch(function (error) {
+          if (error && error.name !== "AbortError") {
+            fallbackCopy(text);
+          }
+        });
+        return;
+      }
+
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(function () {
+          showToast("คัดลอกสรุปทริปแล้ว");
+        }).catch(function () {
+          fallbackCopy(text);
+        });
+        return;
+      }
+
+      fallbackCopy(text);
+    }
+
+    function createDemoPlan() {
+      var tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+
+      return {
+        origin: "bangkok",
+        destination: "chiangmai",
+        startDate: toISODate(tomorrow),
+        days: 3,
+        people: 2,
+        tripName: "Demo Trip เชียงใหม่ 3 วัน",
+        budget: 18000,
+        accommodation: "comfort",
+        foodStyle: "mixed",
+        transport: "best",
+        interests: ["culture", "nature", "food", "cafe"],
+        pace: "balanced",
+        notes: "ทริปตัวอย่างสำหรับทดลองระบบ"
+      };
+    }
+
+    function loadDemoTrip() {
+      showLoading("กำลังสร้าง Demo Trip...");
+
+      window.setTimeout(function () {
+        try {
+          currentTrip = generateTrip(createDemoPlan());
+          renderResult();
+          hideLoading();
+          showPage("result");
+          showToast("สร้าง Demo Trip เรียบร้อยแล้ว");
+        } catch (error) {
+          console.error(error);
+          hideLoading();
+          showToast("ไม่สามารถสร้าง Demo Trip ได้", "error");
+        }
+      }, 550);
+    }
+
+    /* =========================
+       11. EVENT LISTENERS
+    ========================= */
+
+    $("#next-step").addEventListener("click", function () {
+      if (!validateStep(currentStep)) return;
+
+      if (currentStep < 5) {
+        currentStep += 1;
+        renderWizardStep();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    });
+
+    $("#previous-step").addEventListener("click", function () {
+      if (currentStep > 0) {
+        currentStep -= 1;
+        renderWizardStep();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    });
+
+    $("#generate-trip-button").addEventListener(
+      "click",
+      handleGenerateTrip
+    );
+
+    $("#trip-form").addEventListener("submit", function (event) {
+      event.preventDefault();
+
+      if (currentStep === 5) {
+        handleGenerateTrip();
+      }
+    });
+
+    $("#demo-trip-button").addEventListener(
+      "click",
+      loadDemoTrip
+    );
+
+    $("#modal-close").addEventListener("click", closeModal);
+    $("#modal-cancel").addEventListener("click", closeModal);
+
+    $("#modal-save").addEventListener("click", function () {
+      if (typeof modalSaveHandler === "function") {
+        modalSaveHandler();
+      }
+    });
+
+    $("#modal-backdrop").addEventListener("click", function (event) {
+      if (event.target === $("#modal-backdrop")) {
+        closeModal();
+      }
+    });
+
+    document.addEventListener("keydown", function (event) {
+      if (
+        event.key === "Escape" &&
+        !$("#modal-backdrop").classList.contains("hidden")
+      ) {
+        closeModal();
+      }
+    });
+
+    document.addEventListener("click", function (event) {
+      var pageButton = event.target.closest("[data-page]");
+
+      if (pageButton) {
+        showPage(pageButton.dataset.page);
+        return;
+      }
+
+      var stepButton = event.target.closest("[data-step]");
+
+      if (stepButton) {
+        var targetStep = Number(stepButton.dataset.step);
+
+        if (
+          targetStep > currentStep &&
+          !validateStep(currentStep)
+        ) {
+          return;
+        }
+
+        currentStep = targetStep;
+        renderWizardStep();
+        return;
+      }
+
+      var actionButton = event.target.closest("[data-action]");
+
+      if (actionButton) {
+        var action = actionButton.dataset.action;
+
+        if (action === "save") {
+          saveCurrentTrip();
+        } else if (action === "share") {
+          shareCurrentTrip();
+        } else if (action === "print") {
+          window.print();
+        } else if (action === "select-transport") {
+          currentTrip.transportMode = actionButton.dataset.mode;
+          currentTrip.updatedAt = new Date().toISOString();
+          renderResult();
+          showToast("เปลี่ยนรูปแบบการเดินทางแล้ว");
+        } else if (action === "add-activity") {
+          openActivityModal(
+            Number(actionButton.dataset.day),
+            null,
+            null
+          );
+        } else if (action === "edit-activity") {
+          openActivityModal(
+            Number(actionButton.dataset.day),
+            Number(actionButton.dataset.activity),
+            null
+          );
+        } else if (action === "remove-activity") {
+          removeActivity(
+            Number(actionButton.dataset.day),
+            Number(actionButton.dataset.activity)
+          );
+        } else if (action === "add-place") {
+          var place = currentTrip.recommendations.find(function (item) {
+            return item.id === actionButton.dataset.placeId;
+          });
+
+          if (place) {
+            openActivityModal(0, null, place);
+          }
+        } else if (action === "optimize-cheap") {
+          optimizeCheap();
+        } else if (action === "optimize-time") {
+          optimizeTime();
+        } else if (action === "optimize-more") {
+          optimizeMorePlaces();
+        } else if (action === "optimize-balance") {
+          optimizeBalance();
+        }
+
+        return;
+      }
+
+      var savedButton =
+        event.target.closest("[data-saved-action]");
+
+      if (savedButton) {
+        var savedAction =
+          savedButton.dataset.savedAction;
+        var id = savedButton.dataset.id;
+
+        if (savedAction === "load") {
+          loadSavedTrip(id);
+        } else if (savedAction === "rename") {
+          renameSavedTrip(id);
+        } else if (savedAction === "delete") {
+          deleteSavedTrip(id);
+        }
+      }
+    });
+
+    /* =========================
+       12. INITIALIZATION
+    ========================= */
+
+    function initializeApp() {
+      var tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+
+      $("#start-date").value = toISODate(tomorrow);
+      $("#start-date").min = toISODate(new Date());
+
+      renderWizardStep();
+      renderSavedTrips();
+    }
+
+    initializeApp();
+  </script>
+</body>
+</html>
